@@ -10,9 +10,6 @@ public class Perspective implements IPerspectiveFactory {
 		layout.setEditorAreaVisible(false);
 		layout.setFixed(true);
 		
-        System.err.println("Perpsective.createInitialLayout(): thread = " + Thread.currentThread().getContextClassLoader() + ", class = " + Activator.class.getClassLoader());
-
-		
 		layout.addStandaloneView("grokkery.view",  false, IPageLayout.LEFT, 1.0f, editorArea);
 	}
 
