@@ -1,0 +1,24 @@
+#!/bin/bash
+
+
+grokkery=${HOME}/projects/grokkery/code
+plugins=/opt/eclipse/plugins
+
+CLASSPATH=\
+${plugins}/org.eclipse.ui_3.5.2.M20100120-0800.jar:\
+${plugins}/org.eclipse.swt_3.5.2.v3557f.jar:\
+${plugins}/org.eclipse.swt.gtk.linux.x86_64_3.5.2.v3557f.jar:\
+${plugins}/org.eclipse.jface_3.5.2.M20100120-0800.jar:\
+${plugins}/org.eclipse.core.commands_3.5.0.I20090525-2000.jar:\
+${plugins}/org.eclipse.ui.workbench_3.5.2.M20100113-0800.jar:\
+${plugins}/org.eclipse.core.runtime_3.5.0.v20090525.jar:\
+${plugins}/org.eclipse.osgi_3.5.2.R35x_v20100126.jar:\
+${plugins}/org.eclipse.equinox.common_3.5.1.R35x_v20090807-1100.jar:\
+${plugins}/org.eclipse.core.jobs_3.4.100.v20090429-1800.jar:\
+${plugins}/org.eclipse.core.runtime.compatibility.registry_3.2.200.v20090429-1800/runtime_registry_compatibility.jar:\
+${plugins}/org.eclipse.equinox.registry_3.4.100.v20090520-1800.jar:\
+${plugins}/org.eclipse.equinox.preferences_3.2.301.R35x_v20091117.jar:\
+${plugins}/org.eclipse.core.contenttype_3.4.1.R35x_v20090826-0451.jar:\
+${plugins}/org.eclipse.equinox.app_1.2.1.R35x_v20091203.jar:\
+${grokkery}/build/classes\
+ clj
