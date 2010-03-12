@@ -11,4 +11,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.6
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: lib/clojure.jar,
  lib/clojure-contrib.jar,
+ lib/glsimple.jar,
+ lib/jogl.jar,
+ lib/gluegen-rt.jar,
  .
