@@ -17,7 +17,7 @@ public class Perspective implements IPerspectiveFactory
         String editorArea = layout.getEditorArea();
         layout.setEditorAreaVisible(false);
         
-        layout.addView(View.id(), IPageLayout.LEFT, 1.0f, editorArea);
+        layout.addView(GraphView.id(), IPageLayout.LEFT, 1.0f, editorArea);
     }
     
 }

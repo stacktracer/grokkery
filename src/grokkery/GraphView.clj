@@ -1,4 +1,4 @@
-(ns grokkery.View
+(ns grokkery.GraphView
   (:import
     [javax.media.opengl GLContext]
     [javax.media.opengl GL]
@@ -15,7 +15,7 @@
 
 
 (defn -id []
-  "grokkery.view")
+  "grokkery.GraphView")
 
 
 (defn -init-instance []
