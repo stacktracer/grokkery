@@ -19,7 +19,7 @@
 (defn add-verify-listener [widget f & args]
   (let [listener (proxy [VerifyListener] []
                    (verifyText [event]
-                     (when (apply f event args)
+                     (when (= :veto (apply f event args))
                        (set! (. event doit) false))))]
     (.addVerifyListener widget listener)
     listener))
