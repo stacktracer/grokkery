@@ -1,4 +1,6 @@
 (ns grokkery.GraphView
+  (:use
+    grokkery.util)
   (:import
     [javax.media.opengl GLContext]
     [javax.media.opengl GL]
@@ -20,13 +22,6 @@
 
 (defn -init-instance []
   [[] (ref {:focusable nil})])
-
-
-(defn add-listener [widget event-type f & args]
-  (let [listener (proxy [Listener] []
-                   (handleEvent [event] (apply f event args)))]
-    (.addListener widget event-type listener)
-    listener))
 
 
 (defn draw-xaxis [gc bounds]

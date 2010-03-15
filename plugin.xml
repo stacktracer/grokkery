@@ -26,6 +26,12 @@
             class="grokkery.GraphView"
             id="grokkery.GraphView">
       </view>
+      <view
+            class="grokkery.CommandView"
+            id="grokkery.CommandView"
+            name="Command"
+            restorable="true">
+      </view>
    </extension>
 
 </plugin>
