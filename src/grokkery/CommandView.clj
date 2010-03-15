@@ -20,15 +20,22 @@
 
 
 (defn -createPartControl [this parent]
-  (let [control (Text. parent (or-flags SWT/MULTI SWT/WRAP SWT/LEFT))]
+  (let [control (Text. parent (or-flags SWT/MULTI SWT/WRAP SWT/LEFT))
+        editable-index (ref 0)]
     (add-verify-listener control
       (fn [event]
-        (let [c (.character event)]
+        (dosync
           (if
-            (or
-              (< (int c) (int \a))
-              (> (int c) (int \z)))
-            :veto))))
+            (< (.start event) @editable-index)
+              (do
+                (println (str "veto: " (.start event) " < " @editable-index))
+                :veto)
+            (when
+              (#{\newline \return} (.character event))
+              (do
+                (set! (. event text) (str (.text event) ">> "))
+                (ref-set editable-index (+ 4 (.end event)))))))))
+    
     (dosync (alter (.state this) assoc :focusable control))))
 
 
