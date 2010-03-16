@@ -2,4 +2,4 @@
   (dorun
   	(map compile
   		['grokkery.GraphView
-  		 'grokkery.CommandView])))
+  		 'grokkery.ReplConsole])))
