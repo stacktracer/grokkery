@@ -3,7 +3,7 @@
     grokkery.util)
   (:import
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.widgets Text])
+    [org.eclipse.jface.text TextViewer])
   (:gen-class
     :extends org.eclipse.ui.part.ViewPart
     :state state
@@ -20,10 +20,12 @@
 
 
 (defn -createPartControl [this parent]
-  (let [control (Text. parent (or-flags SWT/MULTI SWT/WRAP SWT/LEFT))
+  (let [viewer (TextViewer. parent (or-flags SWT/MULTI SWT/H_SCROLL SWT/V_SCROLL))
+        text (.getTextWidget viewer)
         editable-index (ref 0)]
-    (add-verify-listener control
+    (add-verify-listener text
       (fn [event]
+        (println (str "verifying: " event))
         (dosync
           (if
             (< (.start event) @editable-index)
@@ -36,7 +38,7 @@
                 (set! (. event text) (str (.text event) ">> "))
                 (ref-set editable-index (+ 4 (.end event)))))))))
     
-    (dosync (alter (.state this) assoc :focusable control))))
+    (dosync (alter (.state this) assoc :focusable (.getControl viewer)))))
 
 
 (defn -setFocus [this]
