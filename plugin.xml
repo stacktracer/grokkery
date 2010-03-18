@@ -22,9 +22,10 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            name="GraphView"
+            allowMultiple="true"
             class="grokkery.GraphView"
-            id="grokkery.GraphView">
+            id="grokkery.GraphView"
+            name="GraphView">
       </view>
    </extension>
 
