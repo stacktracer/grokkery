@@ -1,7 +1,7 @@
 (ns grokkery.util
   (:import
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.widgets Listener]
+    [org.eclipse.swt.widgets Listener Display]
     [org.eclipse.swt.events VerifyListener VerifyEvent]))
 
 
@@ -13,4 +13,12 @@
   (let [listener (proxy [Listener] []
                    (handleEvent [event] (apply f event args)))]
     (.addListener widget event-type listener)
-    listener))    
+    listener))
+
+
+(defn ui-run-async [f]
+  (. (Display/getDefault) (asyncExec f)))
+
+
+(defn ui-run-sync [f]
+  (. (Display/getDefault) (syncExec f)))
