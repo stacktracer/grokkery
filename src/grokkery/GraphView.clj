@@ -44,13 +44,15 @@
 
 (defn draw-content [gl bounds]
   (doto gl
+    (.glClearColor 1 1 1 1)
     (.glClear GL/GL_COLOR_BUFFER_BIT)
+    
     (.glEnable GL/GL_BLEND)
     (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
     (.glEnable GL/GL_POINT_SMOOTH)
     (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
-    (.glPointSize 15)
-    (.glColor4f 1 1 1 0.5)
+    (.glPointSize 10)
+    (.glColor4f 0.84 0.14 0.03 1)
     
     (.glBegin GL/GL_POINTS)
     (.glVertex2f 0 0)
