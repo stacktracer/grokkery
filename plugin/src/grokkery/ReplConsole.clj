@@ -31,7 +31,8 @@
         #(binding [*in* (LineNumberingPushbackReader. (InputStreamReader. in))
                    *out* (PrintWriter. out true)
                    *err* (PrintWriter. err true)]
-           (clojure.main/repl))
+           (clojure.main/repl
+             :init (fn [] (in-ns 'user))))
         "Clojure Repl")
       (.setDaemon true)
       (.start))))
