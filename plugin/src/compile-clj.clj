@@ -1,4 +1,4 @@
-(binding [*compile-path* "/home/mike/projects/grokkery/code/build/classes/"]
+(binding [*compile-path* "/home/mike/projects/grokkery/code/plugin/build/classes/"]
   (dorun
   	(map compile
   		['grokkery.GraphView
