@@ -45,40 +45,8 @@ public class Grokkery
     }
     
     
-    
-    private static final String exposureServiceName = "grokkery.ExposureService";
-    
-    private static final String[] bundles = strings("com.ibm.icu",
-                                                    "javax.servlet",
-                                                    "org.eclipse.compare.core",
-                                                    "org.eclipse.core.commands",
-                                                    "org.eclipse.core.contenttype",
-                                                    "org.eclipse.core.databinding",
-                                                    "org.eclipse.core.databinding.observable",
-                                                    "org.eclipse.core.databinding.property",
-                                                    "org.eclipse.core.expressions",
-                                                    "org.eclipse.core.jobs",
-                                                    "org.eclipse.core.runtime@start",
-                                                    "org.eclipse.core.runtime.compatibility.auth",
-                                                    "org.eclipse.core.runtime.compatibility.registry",
-                                                    "org.eclipse.core.variables",
-                                                    "org.eclipse.equinox.app",
-                                                    "org.eclipse.equinox.common@2:start",
-                                                    "org.eclipse.equinox.preferences",
-                                                    "org.eclipse.equinox.registry",
-                                                    "org.eclipse.help",
-                                                    "org.eclipse.jface",
-                                                    "org.eclipse.jface.databinding",
-                                                    "org.eclipse.jface.text",
-                                                    "org.eclipse.osgi@-1:start",
-                                                    "org.eclipse.osgi.services",
-                                                    "org.eclipse.swt",
-                                                    "org.eclipse.text",
-                                                    "org.eclipse.ui",
-                                                    "org.eclipse.ui.console",
-                                                    "org.eclipse.ui.workbench",
-                                                    "org.eclipse.ui.workbench.texteditor",
-                                                    "org.eclipse.swt.gtk.linux.x86_64",
+    private static final String[] bundles = strings("org.eclipse.equinox.common@2:start",
+                                                    "org.eclipse.update.configurator@3:start",
                                                     "reference:file:/home/mike/projects/grokkery/code/plugin@start");
     
     private static final String[] pluginProps = strings("osgi.dev", "file:/home/mike/projects/grokkery/eclipse/.metadata/.plugins/org.eclipse.pde.core/grokkery.application/dev.properties",
@@ -92,6 +60,9 @@ public class Grokkery
                                                         "osgi.noShutdown", "true",
                                                         "eclipse.consoleLog", "true",
                                                         "eclipse.application", "grokkery.application");
+    
+    private static final String exposureServiceName = "grokkery.ExposureService";
+    
     
     private static class Exposure
     {
