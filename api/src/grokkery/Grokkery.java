@@ -14,6 +14,17 @@ import org.osgi.util.tracker.ServiceTrackerCustomizer;
 public class Grokkery
 {
     
+    /**
+     * Exposes {@code object}, as {@code name}, to the Grokkery UI.
+     * 
+     * @throws RuntimeException if anything goes wrong
+     */
+    public static void expose(Object object, String name)
+    {
+        InstanceHolder.grokkery.internalExpose(object, name);
+    }
+    
+    
     // IODH idiom. See http://blogs.metsci.com/hogye/?p=70
     private static class InstanceHolder
     {
@@ -34,32 +45,17 @@ public class Grokkery
     }
     
     
-    /**
-     * Exposes {@code object}, as {@code name}, to the Grokkery UI.
-     * 
-     * @throws RuntimeException if anything goes wrong
-     */
-    public static void expose(Object object, String name)
-    {
-        InstanceHolder.grokkery.internalExpose(object, name);
-    }
-    
-    
-    private static final String[] bundles = strings("org.eclipse.equinox.common@2:start",
-                                                    "org.eclipse.update.configurator@3:start",
-                                                    "reference:file:/home/mike/projects/grokkery/code/plugin@start");
-    
-    private static final String[] pluginProps = strings("osgi.dev", "file:/home/mike/projects/grokkery/eclipse/.metadata/.plugins/org.eclipse.pde.core/grokkery.application/dev.properties",
-                                                        "osgi.install.area", "file:/opt/eclipse",
-                                                        "osgi.framework", "file:/opt/eclipse/plugins/org.eclipse.osgi_3.5.2.R35x_v20100126.jar",
-                                                        "osgi.configuration.cascaded", "false",
-                                                        "osgi.bundles", bundleList(bundles),
-                                                        "osgi.bundles.defaultStartLevel", "4",
-                                                        "osgi.clean", "true",
-                                                        "osgi.debug", "",
-                                                        "osgi.noShutdown", "true",
-                                                        "eclipse.consoleLog", "true",
-                                                        "eclipse.application", "grokkery.application");
+    private static final String[] pluginProps = { "osgi.bundles", "org.eclipse.equinox.common@2:start,org.eclipse.update.configurator@3:start,reference:file:/home/mike/projects/grokkery/code/plugin@start",
+                                                  "osgi.dev", "file:/home/mike/projects/grokkery/eclipse/.metadata/.plugins/org.eclipse.pde.core/grokkery.application/dev.properties",
+                                                  "osgi.install.area", "file:/opt/eclipse",
+                                                  "osgi.framework", "file:/opt/eclipse/plugins/org.eclipse.osgi_3.5.2.R35x_v20100126.jar",
+                                                  "osgi.configuration.cascaded", "false",
+                                                  "osgi.bundles.defaultStartLevel", "4",
+                                                  "osgi.clean", "true",
+                                                  "osgi.debug", "",
+                                                  "osgi.noShutdown", "true",
+                                                  "eclipse.consoleLog", "true",
+                                                  "eclipse.application", "grokkery.application" };
     
     private static final String exposureServiceName = "grokkery.ExposureService";
     
@@ -182,20 +178,6 @@ public class Grokkery
             System.err.println("Failed to expose \"" + name + "\": " + e);
             e.printStackTrace(System.err);
         }
-    }
-    
-    private static String[] strings(String... strings)
-    {
-        return strings;
-    }
-    
-    private static String bundleList(String... bundles)
-    {
-        if (bundles.length == 0) return "";
-        
-        StringBuilder list = new StringBuilder();
-        for (String s : bundles) list.append(",").append(s);
-        return list.substring(1);
     }
     
     private static Properties props(String... keysAndValues)
