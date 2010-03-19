@@ -1,15 +1,25 @@
 package grokkery;
 
 import java.lang.reflect.Method;
-import java.util.NoSuchElementException;
 import java.util.Properties;
 
 import org.eclipse.core.runtime.adaptor.EclipseStarter;
-import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.ServiceReference;
 
 public class Example
 {
+    
+    public static class ExampleObject
+    {
+        public final String name;
+        
+        public ExampleObject(String name)
+        {
+            this.name = name;
+        }
+    }
+    
     
     public static void main(String[] args) throws Exception
     {
@@ -61,17 +71,46 @@ public class Example
         EclipseStarter.setInitialProperties(props);
         BundleContext context = EclipseStarter.startup(new String[0], null);
         
-        Bundle grokkeryBundle = findBundle(context, "grokkery");
-        Class<?> activatorClass = grokkeryBundle.loadClass("grokkery.Activator");
-        for (Method m : activatorClass.getMethods()) System.err.println(m.getName());
+        
+        ExampleObject exampleObject = new ExampleObject("Hello Grokkery, from Application Land!");
+        expose(context, exampleObject, "exampleObject");
+        
         
         EclipseStarter.run(null);
     }
     
-    private static Bundle findBundle(BundleContext context, String symbolicName)
+    private static void expose(BundleContext context, Object object, String name)
     {
-        for (Bundle b : context.getBundles()) if (symbolicName.equals(b.getSymbolicName())) return b;
-        throw new NoSuchElementException(symbolicName);
+        ServiceReference serviceRef = context.getServiceReference("grokkery.ExposureService");
+        if (serviceRef != null)
+        {
+            Object service = context.getService(serviceRef);
+            if (service != null)
+            {
+                try
+                {
+                    Method exposeMethod = service.getClass().getMethod("expose", Object.class, String.class);
+                    exposeMethod.invoke(service, object, name);
+                }
+                catch (Exception e)
+                {
+                    System.err.println("Call to ExposureService.expose() failed: " + e);
+                    e.printStackTrace(System.err);
+                }
+                finally
+                {
+                    context.ungetService(serviceRef);
+                }
+            }
+            else
+            {
+                System.err.println("Exposure service not found: service-ref = " + serviceRef);
+            }
+        }
+        else
+        {
+            System.err.println("No exposure service-ref found");
+        }
     }
     
     private static String bundleList(String... bundles)

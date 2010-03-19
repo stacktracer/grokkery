@@ -1,5 +1,7 @@
 package grokkery;
 
+import java.util.Properties;
+
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.osgi.framework.BundleContext;
@@ -20,6 +22,9 @@ public class Activator extends AbstractUIPlugin
     {
         super.start(context);
         plugin = this;
+        
+        ExposureService exposureService = new ExposureService();
+        context.registerService(ExposureService.class.getName(), exposureService, new Properties());
     }
     
     @Override
