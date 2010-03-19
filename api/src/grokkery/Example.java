@@ -1,6 +1,5 @@
 package grokkery;
 
-
 public class Example
 {
     
