@@ -27,7 +27,8 @@
 
 ; Create a GraphView
 ;(use 'grokkery.util)
-;(ui-run-async #(.showView page "grokkery.GraphView"))
+;(import [org.eclipse.ui IWorkbenchPage])
+;(ui-run-async #(.showView page "grokkery.GraphView" "1" IWorkbenchPage/VIEW_VISIBLE))
 
 
 (defn -post-init-instance [this]
