@@ -26,46 +26,63 @@
 
 
 (defn -init
+  
   ([this site]
     (.superInit this site)
     (.setPartName this (str "Fig " (.getSecondaryId site))))
+  
   ([this site memento]
     (.init this site)))
 
 
-(defn draw-xaxis [gc bounds]
-  ; IMPLEMENT ME
-  )
+(defn draw-xaxis
+
+  ([data]
+    (fn [gc bounds] (draw-xaxis data gc bounds)))
+  
+  ([data gc bounds]
+    ; IMPLEMENT ME
+    ))
 
 
 (defn get-xaxis-height [gc]
   30)
 
 
-(defn draw-yaxis [gc bounds]
-  ; IMPLEMENT ME
-  )
+(defn draw-yaxis
+  
+  ([data]
+    (fn [gc bounds] (draw-yaxis data gc bounds)))
+  
+  ([data gc bounds]
+    ; IMPLEMENT ME
+    ))
 
 
 (defn get-yaxis-width [gc]
   30)
 
 
-(defn draw-content [gl bounds]
-  (doto gl
-    (.glClearColor 1 1 1 1)
-    (.glClear GL/GL_COLOR_BUFFER_BIT)
-    
-    (.glEnable GL/GL_BLEND)
-    (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
-    (.glEnable GL/GL_POINT_SMOOTH)
-    (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
-    (.glPointSize 10)
-    (.glColor4f 0.84 0.14 0.03 1)
-    
-    (.glBegin GL/GL_POINTS)
-    (.glVertex2f 0 0)
-    (.glEnd)))
+(defn draw-content
+  
+  ([data]
+    (fn [gl bounds] (draw-content data gl bounds)))
+  
+  ([data gl bounds]
+    (doto gl
+      (.glClearColor 1 1 1 1)
+      (.glClear GL/GL_COLOR_BUFFER_BIT)
+      
+      (.glEnable GL/GL_BLEND)
+      (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
+      (.glEnable GL/GL_POINT_SMOOTH)
+      (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
+      (.glPointSize 10)
+      (.glColor4f 0.84 0.14 0.03 1)
+      
+      (.glBegin GL/GL_POINTS)
+      (.glVertex2f 0 0)
+      (.glEnd))))
 
 
 (defn make-canvas [parent draw]
@@ -96,9 +113,10 @@
 
 
 (defn -createPartControl [this parent]
-  (let [x-axis (make-canvas parent draw-xaxis)
-        y-axis (make-canvas parent draw-yaxis)
-        content-area (make-gl-canvas parent draw-content)]
+  (let [data :IMPLEMENT-ME
+        x-axis (make-canvas parent (draw-xaxis data))
+        y-axis (make-canvas parent (draw-yaxis data))
+        content-area (make-gl-canvas parent (draw-content data))]
     
     (.setLayout parent nil)
     (add-listener parent SWT/Resize
