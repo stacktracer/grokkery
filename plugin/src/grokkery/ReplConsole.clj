@@ -1,34 +1,43 @@
 (ns grokkery.ReplConsole
   (:require
     clojure.main)
+  (:use
+    grokkery.util)
   (:import
     [java.io InputStreamReader PrintWriter]
     [clojure.lang LineNumberingPushbackReader]
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics Color]
+    [org.eclipse.ui PlatformUI IWorkbenchPage]
     [org.eclipse.ui.console IOConsoleInputStream IOConsoleOutputStream])
   (:gen-class
     :extends org.eclipse.ui.console.IOConsole
     :init init-instance
     :constructors {[] [String org.eclipse.jface.resource.ImageDescriptor]}
-    :post-init post-init-instance
-    :exposes-methods {createPage superCreatePage}))
+    :post-init post-init-instance))
 
 
 (defn -init-instance []
   [["Clojure Repl" nil] nil])
 
 
-(defn -createPage [this view]
-  (intern 'user 'page (.. view (getSite) (getPage)))
-  (.. System err (println "-createPage"))
-  (. this superCreatePage view))
+(defn figure [number]
+  (ui-run-async
+    #(..
+       PlatformUI
+       (getWorkbench)
+       (getActiveWorkbenchWindow)
+       (getActivePage)
+       (showView
+         "grokkery.GraphView"
+         (str number)
+         IWorkbenchPage/VIEW_VISIBLE))))
 
 
-; Create a GraphView
-;(use 'grokkery.util)
-;(import [org.eclipse.ui IWorkbenchPage])
-;(ui-run-async #(.showView page "grokkery.GraphView" "1" IWorkbenchPage/VIEW_VISIBLE))
+(defn init-repl []
+  (let [repl-ns 'user]
+    (intern repl-ns 'figure figure)
+    (in-ns repl-ns)))
 
 
 (defn -post-init-instance [this]
@@ -44,8 +53,7 @@
         #(binding [*in* (LineNumberingPushbackReader. (InputStreamReader. in))
                    *out* (PrintWriter. out true)
                    *err* (PrintWriter. err true)]
-           (clojure.main/repl
-             :init (fn [] (in-ns 'user))))
+           (clojure.main/repl :init init-repl))
         "Clojure Repl")
       (.setDaemon true)
       (.start))))
