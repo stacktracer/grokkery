@@ -11,11 +11,23 @@
     :extends org.eclipse.ui.console.IOConsole
     :init init-instance
     :constructors {[] [String org.eclipse.jface.resource.ImageDescriptor]}
-    :post-init post-init-instance))
+    :post-init post-init-instance
+    :exposes-methods {createPage superCreatePage}))
 
 
 (defn -init-instance []
   [["Clojure Repl" nil] nil])
+
+
+(defn -createPage [this view]
+  (intern 'user 'page (.. view (getSite) (getPage)))
+  (.. System err (println "-createPage"))
+  (. this superCreatePage view))
+
+
+; Create a GraphView
+;(use 'grokkery.util)
+;(ui-run-async #(.showView page "grokkery.GraphView"))
 
 
 (defn -post-init-instance [this]

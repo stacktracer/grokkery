@@ -25,7 +25,7 @@
             allowMultiple="true"
             class="grokkery.GraphView"
             id="grokkery.GraphView"
-            name="GraphView">
+            name="Graph">
       </view>
    </extension>
 
