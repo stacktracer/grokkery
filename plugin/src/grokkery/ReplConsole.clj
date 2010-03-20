@@ -8,7 +8,6 @@
     [clojure.lang LineNumberingPushbackReader]
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics Color]
-    [org.eclipse.ui PlatformUI IWorkbenchPage]
     [org.eclipse.ui.console IOConsoleInputStream IOConsoleOutputStream])
   (:gen-class
     :extends org.eclipse.ui.console.IOConsole
@@ -21,23 +20,8 @@
   [["Clojure Repl" nil] nil])
 
 
-(defn figure [number]
-  (ui-run-async
-    #(..
-       PlatformUI
-       (getWorkbench)
-       (getActiveWorkbenchWindow)
-       (getActivePage)
-       (showView
-         "grokkery.GraphView"
-         (str number)
-         IWorkbenchPage/VIEW_VISIBLE))))
-
-
 (defn init-repl []
-  (let [repl-ns 'user]
-    (intern repl-ns 'figure figure)
-    (in-ns repl-ns)))
+  (in-ns 'user))
 
 
 (defn -post-init-instance [this]
