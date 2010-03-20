@@ -13,6 +13,7 @@
     :extends org.eclipse.ui.part.ViewPart
     :state state
     :init init-instance
+    :exposes-methods {init superInit}
     :methods [#^{:static true} [id [] String]]))
 
 
@@ -22,6 +23,14 @@
 
 (defn -init-instance []
   [[] (ref {:focusable nil})])
+
+
+(defn -init
+  ([this site]
+    (.superInit this site)
+    (.setPartName this (str "Fig " (.getSecondaryId site))))
+  ([this site memento]
+    (.init this site)))
 
 
 (defn draw-xaxis [gc bounds]
