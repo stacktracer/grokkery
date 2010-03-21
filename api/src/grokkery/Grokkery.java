@@ -57,7 +57,7 @@ public class Grokkery
                                                   "eclipse.consoleLog", "true",
                                                   "eclipse.application", "grokkery.application" };
     
-    private static final String exposureServiceName = "grokkery.ExposureService";
+    private static final String serviceName = "grokkery.GrokkeryService";
     
     
     private static class Exposure
@@ -73,16 +73,16 @@ public class Grokkery
     }
     
     
-    private final Object exposureServiceLock;
+    private Object service;
+    private final Object serviceLock;
     private final List<Exposure> exposureBacklog;
-    private Object exposureService;
     
     
     private Grokkery()
     {
-        exposureServiceLock = new Object();
+        service = null;
+        serviceLock = new Object();
         exposureBacklog = new LinkedList<Exposure>();
-        exposureService = null;
     }
     
     private void start() throws Exception
@@ -97,36 +97,36 @@ public class Grokkery
                     EclipseStarter.setInitialProperties(props(pluginProps));
                     final BundleContext context = EclipseStarter.startup(new String[0], null);
                     
-                    serviceTracker = new ServiceTracker(context, exposureServiceName, new ServiceTrackerCustomizer()
+                    serviceTracker = new ServiceTracker(context, serviceName, new ServiceTrackerCustomizer()
                     {
                         public Object addingService(ServiceReference ref)
                         {
-                            synchronized (exposureServiceLock)
+                            synchronized (serviceLock)
                             {
-                                if (exposureService != null) throw new RuntimeException();
+                                if (service != null) throw new RuntimeException();
                                 
-                                exposureService = context.getService(ref);
-                                if (exposureService == null) throw new RuntimeException();
-                                if (!exposureServiceName.equals(exposureService.getClass().getName())) throw new RuntimeException();
+                                service = context.getService(ref);
+                                if (service == null) throw new RuntimeException();
+                                if (!serviceName.equals(service.getClass().getName())) throw new RuntimeException();
                                 
-                                for (Exposure x : exposureBacklog) doExpose(exposureService, x.object, x.name);
-                                return exposureService;
+                                for (Exposure x : exposureBacklog) doExpose(service, x.object, x.name);
+                                return service;
                             }
                         }
                         
                         public void modifiedService(ServiceReference ref, Object service)
                         {
-                            synchronized (exposureServiceLock)
+                            synchronized (serviceLock)
                             {
-                                exposureService = service;
+                                Grokkery.this.service = service;
                             }
                         }
                         
                         public void removedService(ServiceReference ref, Object service)
                         {
-                            synchronized (exposureServiceLock)
+                            synchronized (serviceLock)
                             {
-                                exposureService = null;
+                                service = null;
                                 context.ungetService(ref);
                             }
                         }
@@ -150,27 +150,27 @@ public class Grokkery
     
     private void internalExpose(Object object, String name)
     {
-        synchronized (exposureServiceLock)
+        synchronized (serviceLock)
         {
-            if (exposureService == null)
+            if (service == null)
             {
                 System.err.println("Adding exposure of \"" + name + "\" to backlog");
                 exposureBacklog.add(new Exposure(object, name));
             }
             else
             {
-                doExpose(exposureService, object, name);
+                doExpose(service, object, name);
             }
         }
     }
     
-    private static void doExpose(Object exposureService, Object object, String name)
+    private static void doExpose(Object service, Object object, String name)
     {
         try
         {
             System.err.println("Attempting to expose \"" + name + "\"");
-            Method exposeMethod = exposureService.getClass().getMethod("expose", Object.class, String.class);
-            exposeMethod.invoke(exposureService, object, name);
+            Method exposeMethod = service.getClass().getMethod("expose", Object.class, String.class);
+            exposeMethod.invoke(service, object, name);
             System.err.println("Exposed \"" + name + "\"");
         }
         catch (Exception e)

@@ -3,7 +3,7 @@ Bundle-ManifestVersion: 2
 Bundle-Name: Grokkery
 Bundle-SymbolicName: grokkery; singleton:=true
 Bundle-Version: 0.1
-Bundle-Activator: grokkery.Activator
+Bundle-Activator: grokkery.GrokkeryPlugin
 Bundle-Vendor: Metron, Inc.
 Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
