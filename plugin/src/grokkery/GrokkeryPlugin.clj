@@ -7,8 +7,7 @@
   (:gen-class
     :extends org.eclipse.ui.plugin.AbstractUIPlugin
     :exposes-methods {start superStart
-                      stop superStop}
-    :methods [#^{:static true} [id [] String]]))
+                      stop superStop}))
 
 
 (def id "grokkery")

@@ -16,7 +16,7 @@
       <perspective
             name="Perspective"
             class="grokkery.Perspective"
-            id="grokkery.perspective">
+            id="grokkery.Perspective">
       </perspective>
    </extension>
    <extension

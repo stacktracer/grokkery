@@ -13,12 +13,10 @@
     :extends org.eclipse.ui.part.ViewPart
     :state state
     :init init-instance
-    :exposes-methods {init superInit}
-    :methods [#^{:static true} [id [] String]]))
+    :exposes-methods {init superInit}))
 
 
-(defn -id []
-  "grokkery.GraphView")
+(def id "grokkery.GraphView")
 
 
 (defn -init-instance []

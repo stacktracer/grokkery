@@ -5,4 +5,5 @@
        'grokkery.GrokkeryPlugin
   		 'grokkery.ReplConsole
        'grokkery.GraphView
+       'grokkery.Perspective
   		 'grokkery.GrokkeryApp])))
