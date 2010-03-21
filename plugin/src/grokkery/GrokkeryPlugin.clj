@@ -8,13 +8,10 @@
     :extends org.eclipse.ui.plugin.AbstractUIPlugin
     :exposes-methods {start superStart
                       stop superStop}
-    :methods [#^{:static true} [id [] String]
-              #^{:static true} [getDefault [] org.eclipse.ui.plugin.AbstractUIPlugin]
-              #^{:static true} [getImageDescriptor [String] org.eclipse.jface.resource.ImageDescriptor]]))
+    :methods [#^{:static true} [id [] String]]))
 
 
-(defn -id []
-  "grokkery")
+(def id "grokkery")
 
 
 (def plugin (ref nil))
@@ -29,11 +26,3 @@
 (defn -stop [this context]
   (dosync (ref-set plugin nil))
   (.superStop this context))
-
-
-(defn -getDefault []
-  @plugin)
-
-
-(defn -getImageDescriptor [image-path]
-  (AbstractUIPlugin/imageDescriptorFromPlugin (-id) image-path))
