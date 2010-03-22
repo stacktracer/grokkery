@@ -15,6 +15,14 @@ public class Grokkery
 {
     
     /**
+     * Sets the client name to appear in Grokkery window titles.
+     */
+    public static void setClientName(String clientName)
+    {
+        System.setProperty("grokkery.client", clientName);
+    }
+    
+    /**
      * Exposes {@code object}, as {@code name}, to the Grokkery UI.
      * 
      * @throws RuntimeException if anything goes wrong

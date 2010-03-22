@@ -18,6 +18,7 @@ public class Example
     {
         ExampleObject exampleObject = new ExampleObject("Hello Grokkery, from Application Land!");
         
+        Grokkery.setClientName(Example.class.getSimpleName());
         Grokkery.expose(exampleObject, "exampleObject");
     }
     

@@ -13,7 +13,13 @@
     :implements [org.eclipse.equinox.app.IApplication]))
 
 
-(def window-title "Grokkery")
+(def window-title
+  (let [base "Grokkery"
+        client (System/getProperty "grokkery.client")]
+    (if client
+      (str base " - " client)
+      base)))
+
 (def window-size [1024 768])
 (def save-and-restore? false)
 
