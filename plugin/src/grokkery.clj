@@ -7,14 +7,17 @@
     [org.eclipse.ui PlatformUI IWorkbenchPage]))
 
 
+(defn get-active-page []
+  (..
+    PlatformUI
+    (getWorkbench)
+    (getActiveWorkbenchWindow)
+    (getActivePage)))
+
+
 (defn figure [number]
-  (ui-run-async
-    #(..
-       PlatformUI
-       (getWorkbench)
-       (getActiveWorkbenchWindow)
-       (getActivePage)
-       (showView
-         Figure/id
-         (str number)
-         IWorkbenchPage/VIEW_VISIBLE))))
+  (ui-sync-exec
+    #(.showView (get-active-page)
+       Figure/id
+       (str number)
+       IWorkbenchPage/VIEW_VISIBLE)))

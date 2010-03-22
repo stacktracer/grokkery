@@ -16,9 +16,13 @@
     listener))
 
 
-(defn ui-run-async [f]
-  (. (Display/getDefault) (asyncExec f)))
+(defn ui-async-exec [f]
+  (.asyncExec (Display/getDefault) f))
 
 
-(defn ui-run-sync [f]
-  (. (Display/getDefault) (syncExec f)))
+(defn ui-sync-exec [f]
+  (let [retref (ref nil)]
+    (.syncExec (Display/getDefault)
+      #(let [retval (f)]
+         (dosync (ref-set retref retval)))) 
+    @retref))
