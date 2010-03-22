@@ -4,6 +4,6 @@
       ['grokkery.GrokkeryService
        'grokkery.GrokkeryPlugin
        'grokkery.ReplConsole
-       'grokkery.FigureView
+       'grokkery.Figure
        'grokkery.Perspective
        'grokkery.GrokkeryApp])))

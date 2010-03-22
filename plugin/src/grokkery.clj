@@ -1,6 +1,6 @@
 (ns grokkery
   (:require
-    [grokkery.FigureView :as FigureView])
+    [grokkery.Figure :as Figure])
   (:use
     grokkery.util)
   (:import
@@ -15,6 +15,6 @@
        (getActiveWorkbenchWindow)
        (getActivePage)
        (showView
-         FigureView/id
+         Figure/id
          (str number)
          IWorkbenchPage/VIEW_VISIBLE))))
