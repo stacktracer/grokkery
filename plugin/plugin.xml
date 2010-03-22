@@ -23,9 +23,9 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="true"
-            class="grokkery.GraphView"
-            id="grokkery.GraphView"
-            name="Graph">
+            class="grokkery.FigureView"
+            id="grokkery.FigureView"
+            name="Figure">
       </view>
    </extension>
 

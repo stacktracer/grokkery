@@ -1,4 +1,4 @@
-(ns grokkery.GraphView
+(ns grokkery.FigureView
   (:use
     grokkery.util)
   (:import
@@ -16,7 +16,7 @@
     :exposes-methods {init superInit}))
 
 
-(def id "grokkery.GraphView")
+(def id "grokkery.FigureView")
 
 
 (defn -init-instance []
