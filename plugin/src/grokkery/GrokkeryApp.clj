@@ -13,13 +13,7 @@
     :implements [org.eclipse.equinox.app.IApplication]))
 
 
-(def window-title
-  (let [base "Grokkery"
-        client (System/getProperty "grokkery.client")]
-    (if client
-      (str base " - " client)
-      base)))
-
+(def window-title-root "Grokkery")
 (def window-size [1024 768])
 (def save-and-restore? false)
 
@@ -35,7 +29,10 @@
         (.setInitialSize (Point. (first window-size) (second window-size)))
         (.setShowCoolBar false)
         (.setShowStatusLine false)
-        (.setTitle window-title)))))
+        (.setTitle
+          (if-let [client (System/getProperty "grokkery.client")]
+            (str window-title-root " - " client)
+            window-title-root))))))
 
 
 (defn workbench-advisor []
