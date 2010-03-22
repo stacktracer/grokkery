@@ -1,6 +1,6 @@
 (ns grokkery.Perspective
   (:require
-    grokkery.GraphView)
+    [grokkery.GraphView :as GraphView])
   (:use
     clojure.contrib.import-static)
   (:gen-class
@@ -21,7 +21,7 @@
   (.setEditorAreaVisible layout false)
   (.addPlaceholder
     (.createPlaceholderFolder layout "north" TOP (float 0.62) ID_EDITOR_AREA)
-    (str grokkery.GraphView/id ":*"))
+    (str GraphView/id ":*"))
   
   (.addView layout ID_CONSOLE_VIEW BOTTOM (float 0.62) ID_EDITOR_AREA)
   (set-uncloseable layout ID_CONSOLE_VIEW))    

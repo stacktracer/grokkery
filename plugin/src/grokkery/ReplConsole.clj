@@ -1,8 +1,6 @@
 (ns grokkery.ReplConsole
   (:require
     clojure.main)
-  (:use
-    grokkery.util)
   (:import
     [java.io InputStreamReader PrintWriter]
     [clojure.lang LineNumberingPushbackReader]

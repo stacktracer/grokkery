@@ -1,6 +1,8 @@
 (ns grokkery.GrokkeryApp
+  (:require
+    [grokkery.Perspective :as Perspective])
   (:import
-    [grokkery ReplConsole Perspective]
+    [grokkery ReplConsole]
     [org.eclipse.equinox.app IApplication IApplicationContext]
     [org.eclipse.swt.widgets Display]
     [org.eclipse.swt.graphics Point]
@@ -11,6 +13,11 @@
     :implements [org.eclipse.equinox.app.IApplication]))
 
 
+(def window-title "Grokkery")
+(def window-size [1024 768])
+(def save-and-restore? false)
+
+
 (defn workbench-window-advisor [configurer]
   (proxy [WorkbenchWindowAdvisor] [configurer]
     
@@ -19,23 +26,23 @@
     
     (preWindowOpen []
       (doto (.getWindowConfigurer this)
-        (.setInitialSize (Point. 1024 768))
+        (.setInitialSize (Point. (first window-size) (second window-size)))
         (.setShowCoolBar false)
         (.setShowStatusLine false)
-        (.setTitle "Grokkery")))))
+        (.setTitle window-title)))))
 
 
 (defn workbench-advisor []
   (proxy [WorkbenchAdvisor] []
     
     (initialize [configurer]
-      #_(.setSaveAndRestore configurer true))
+      (.setSaveAndRestore configurer save-and-restore?))
     
     (createWorkbenchWindowAdvisor [configurer]
       (workbench-window-advisor configurer))
     
     (getInitialWindowPerspectiveId []
-      (Perspective/id))
+      Perspective/id)
     
     (postStartup []
       (let [console (ReplConsole.)]
