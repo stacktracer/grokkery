@@ -2,11 +2,11 @@
   (:use
     grokkery.util)
   (:import
-    [javax.media.opengl GLContext]
-    [javax.media.opengl GL]
+    [javax.media.opengl GL GLContext]
+    [org.eclipse.swt.opengl GLCanvas]
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics GC]
-    [org.eclipse.swt.widgets Canvas Listener]
+    [org.eclipse.swt.widgets Canvas Listener Event Composite]
     [glsimple GLSimpleListener]
     [glsimple.swt GLSimpleSwtCanvas GLSimpleSwtAnimator])
   (:gen-class
@@ -24,97 +24,101 @@
 
 
 (defn -init
-  
-  ([this site]
-    (.superInit this site)
-    (.setPartName this (str "Fig " (.getSecondaryId site))))
-  
-  ([this site memento]
-    (.init this site)))
-
-
-(defn draw-xaxis
-
-  ([data]
-    (fn [gc bounds] (draw-xaxis data gc bounds)))
-  
-  ([data gc bounds]
-    ; IMPLEMENT ME
-    ))
+  ([fig site]
+    (.superInit fig site)
+    (.setPartName fig (str "Fig " (.getSecondaryId site))))
+  ([fig site memento]
+    (.init fig site)))
 
 
 (defn get-xaxis-height [gc]
   30)
 
 
-(defn draw-yaxis
-  
-  ([data]
-    (fn [gc bounds] (draw-yaxis data gc bounds)))
-  
-  ([data gc bounds]
-    ; IMPLEMENT ME
-    ))
-
-
 (defn get-yaxis-width [gc]
   30)
 
 
-(defn draw-content
-  
-  ([data]
-    (fn [gl bounds] (draw-content data gl bounds)))
-  
-  ([data gl bounds]
-    (doto gl
-      (.glClearColor 1 1 1 1)
-      (.glClear GL/GL_COLOR_BUFFER_BIT)
-      
-      (.glEnable GL/GL_BLEND)
-      (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
-      (.glEnable GL/GL_POINT_SMOOTH)
-      (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
-      (.glPointSize 10)
-      (.glColor4f 0.84 0.14 0.03 1)
-      
-      (.glBegin GL/GL_POINTS)
-      (.glVertex2f 0 0)
-      (.glEnd))))
+(let [plotnums (ref {})
+      plots (ref {})]
+
+  (defn- claim-plotnum [fig]
+    (dosync
+      (alter plotnums
+        update-in [fig]
+          #(if % (inc %) 0))
+      (plotnums fig)))
 
 
-(defn make-canvas [parent draw]
+  (defn add-plot [fig data-ref drawfn-ref]
+    (let [plotnum (claim-plotnum fig)
+          plot {:data data-ref :drawfn drawfn-ref}]
+      (dosync
+        (alter plots
+          update-in [fig]
+            assoc plotnum plot))
+      plotnum))
+
+
+  (defn remove-plot [fig plotnum]
+    (dosync
+      (alter plots
+        update-in [fig]
+          dissoc plotnum)))
+
+
+  (defn- draw-plot [gl plot]
+    (when-let [drawfn @(:drawfn plot)]
+      (drawfn gl @(:data plot))))
+
+
+  (defn- draw-plots [fig gl]
+    (dorun
+      (map
+        (fn [[_ plot]] (draw-plot gl plot))
+        (@plots fig)))))
+
+
+(defn- #^Canvas make-canvas [fig parent]
   (let [canvas (Canvas. parent SWT/DOUBLE_BUFFERED)]
-    (add-listener canvas SWT/Paint (fn [event] (draw (.gc event) (.getBounds canvas))))
+    (add-listener canvas SWT/Paint
+      (fn [#^Event event]
+        (when-let [draw nil]
+          (draw (.gc event) (.getBounds canvas)))))
     canvas))
 
 
-(defn make-gl-canvas [parent draw]
+(defn- #^GLCanvas make-gl-canvas [fig parent]
   (let [bounds (ref {:x 0, :y 0, :width 0, :height 0})
         canvas (GLSimpleSwtCanvas.
                  parent
                  (into-array GLSimpleListener
                    [(proxy [GLSimpleListener] []
                       
-                      (init [context])
+                      (init [#^GLContext context]
+                        (doto (.getGL context)
+                          (.setSwapInterval 0)
+                          (.glClearColor 1 1 1 1)))
                       
-                      (display [context]
-                        (draw (.getGL context) @bounds))
+                      (display [#^GLContext context]
+                        (let [gl (.getGL context)]
+                          (.glClear gl GL/GL_COLOR_BUFFER_BIT)
+                          (draw-plots fig gl)))
                       
-                      (reshape [context x y width height]
-                        (dosync (ref-set bounds {:x x, :y y, :width width, :height height})))
+                      (reshape [#^GLContext context x y width height]
+                        (dosync
+                          (ref-set bounds {:x x, :y y, :width width, :height height})))
                       
                       (displayChanged [context modeChanged deviceChanged]))]))]
     
-    (.start (GLSimpleSwtAnimator. 60 canvas))
+    (.start (GLSimpleSwtAnimator. 30 canvas))
     canvas))
 
 
-(defn -createPartControl [this parent]
-  (let [data :IMPLEMENT-ME
-        x-axis (make-canvas parent (draw-xaxis data))
-        y-axis (make-canvas parent (draw-yaxis data))
-        content-area (make-gl-canvas parent (draw-content data))]
+(defn -createPartControl [fig #^Composite parent]
+  (let [x-axis (make-canvas fig parent)
+        y-axis (make-canvas fig parent)
+        content-area (make-gl-canvas fig parent)]
     
     (.setLayout parent nil)
     (add-listener parent SWT/Resize
@@ -132,8 +136,10 @@
               (.setBounds content-area yaxis-width 0 content-width content-height))
             (finally (.dispose gc))))))
     
-    (dosync (alter (.state this) assoc :focusable content-area))))
+    (dosync
+      (alter (.state fig) assoc :focusable content-area))))
 
 
-(defn -setFocus [this]
-  (when-let [focusable (:focusable @(.state this))] (.setFocus focusable)))
+(defn -setFocus [fig]
+  (when-let [focusable (:focusable @(.state fig))]
+    (.setFocus focusable)))

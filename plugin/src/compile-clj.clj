@@ -1,3 +1,4 @@
+(set! *warn-on-reflection* true)
 (binding [*compile-path* "/home/mike/projects/grokkery/code/plugin/build/classes/"]
   (dorun
     (map compile
@@ -6,4 +7,5 @@
        'grokkery.ReplConsole
        'grokkery.Figure
        'grokkery.Perspective
-       'grokkery.GrokkeryApp])))
+       'grokkery.GrokkeryApp
+       'grokkery])))
