@@ -2,7 +2,8 @@
   (:import
     [org.eclipse.swt SWT]
     [org.eclipse.swt.widgets Listener Display]
-    [org.eclipse.swt.events VerifyListener VerifyEvent]))
+    [org.eclipse.swt.events VerifyListener VerifyEvent]
+    [org.eclipse.ui PlatformUI]))
 
 
 (defn or-flags [& flags]
@@ -26,3 +27,11 @@
       #(let [retval (f)]
          (dosync (ref-set retref retval)))) 
     @retref))
+
+
+(defn get-active-page []
+  (..
+    PlatformUI
+    (getWorkbench)
+    (getActiveWorkbenchWindow)
+    (getActivePage)))

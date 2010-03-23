@@ -1,6 +1,7 @@
-(ns grokkery.Figure
+(ns grokkery.FigureView
   (:use
-    grokkery.util)
+    grokkery.util
+    grokkery.figure)
   (:import
     [javax.media.opengl GL GLContext]
     [org.eclipse.swt.opengl GLCanvas]
@@ -16,7 +17,7 @@
     :exposes-methods {init superInit}))
 
 
-(def id "grokkery.Figure")
+(def id "grokkery.FigureView")
 
 
 (defn -init-instance []
@@ -39,47 +40,7 @@
   30)
 
 
-(let [plotnums (ref {})
-      plots (ref {})]
-
-  (defn- claim-plotnum [fig]
-    (dosync
-      (alter plotnums
-        update-in [fig]
-          #(if % (inc %) 0))
-      (plotnums fig)))
-
-
-  (defn add-plot [fig data-ref drawfn-ref]
-    (let [plotnum (claim-plotnum fig)
-          plot {:data data-ref :drawfn drawfn-ref}]
-      (dosync
-        (alter plots
-          update-in [fig]
-            assoc plotnum plot))
-      plotnum))
-
-
-  (defn remove-plot [fig plotnum]
-    (dosync
-      (alter plots
-        update-in [fig]
-          dissoc plotnum)))
-
-
-  (defn- draw-plot [gl plot]
-    (when-let [drawfn @(:drawfn plot)]
-      (drawfn gl @(:data plot))))
-
-
-  (defn- draw-plots [fig gl]
-    (dorun
-      (map
-        (fn [[_ plot]] (draw-plot gl plot))
-        (@plots fig)))))
-
-
-(defn- #^Canvas make-canvas [fig parent]
+(defn- #^Canvas make-canvas [parent fignum]
   (let [canvas (Canvas. parent SWT/DOUBLE_BUFFERED)]
     (add-listener canvas SWT/Paint
       (fn [#^Event event]
@@ -88,7 +49,7 @@
     canvas))
 
 
-(defn- #^GLCanvas make-gl-canvas [fig parent]
+(defn- #^GLCanvas make-gl-canvas [parent fignum]
   (let [bounds (ref {:x 0, :y 0, :width 0, :height 0})
         canvas (GLSimpleSwtCanvas.
                  parent
@@ -103,7 +64,7 @@
                       (display [#^GLContext context]
                         (let [gl (.getGL context)]
                           (.glClear gl GL/GL_COLOR_BUFFER_BIT)
-                          (draw-plots fig gl)))
+                          (draw-plots gl fignum)))
                       
                       (reshape [#^GLContext context x y width height]
                         (dosync
@@ -116,9 +77,10 @@
 
 
 (defn -createPartControl [fig #^Composite parent]
-  (let [x-axis (make-canvas fig parent)
-        y-axis (make-canvas fig parent)
-        content-area (make-gl-canvas fig parent)]
+  (let [fignum (get-fignum fig)
+        x-axis (make-canvas parent fignum)
+        y-axis (make-canvas parent fignum)
+        content-area (make-gl-canvas parent fignum)]
     
     (.setLayout parent nil)
     (add-listener parent SWT/Resize

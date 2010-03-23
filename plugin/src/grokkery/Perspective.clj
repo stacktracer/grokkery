@@ -1,6 +1,6 @@
 (ns grokkery.Perspective
   (:require
-    [grokkery.Figure :as Figure])
+    [grokkery.FigureView :as FigureView])
   (:use
     clojure.contrib.import-static)
   (:gen-class
@@ -21,7 +21,7 @@
   (.setEditorAreaVisible layout false)
   (.addPlaceholder
     (.createPlaceholderFolder layout "north" TOP (float 0.62) ID_EDITOR_AREA)
-    (str Figure/id ":*"))
+    (str FigureView/id ":*"))
   
   (.addView layout ID_CONSOLE_VIEW BOTTOM (float 0.62) ID_EDITOR_AREA)
   (set-uncloseable layout ID_CONSOLE_VIEW))    

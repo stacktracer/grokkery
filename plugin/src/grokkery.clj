@@ -1,64 +1,43 @@
 (ns grokkery
   (:require
-    [grokkery.Figure :as Figure])
+    [grokkery.figure :as figure])
   (:use
     grokkery.util)
   (:import
-    [javax.media.opengl GL]
-    [org.eclipse.ui PlatformUI IWorkbenchPage]))
+    [javax.media.opengl GL]))
 
 
-(defn get-page []
-  (..
-    PlatformUI
-    (getWorkbench)
-    (getActiveWorkbenchWindow)
-    (getActivePage)))
 
 
-(defn show-fig [fignum]
-  (ui-sync-exec
-    #(.showView (get-page)
-       Figure/id
-       (str fignum)
-       IWorkbenchPage/VIEW_VISIBLE)))
+(defn plot
+  ([fignum]
+    (plot fignum [] {} nil {}))
+  ([fignum data axfns drawfn]
+    (plot fignum data axfns drawfn {}))
+  ([fignum data axfns drawfn attrs]
+    (ui-sync-exec
+      #(add-plot fignum (ref data) (ref axfns) (ref drawfn) (ref attrs)))))
 
 
-(defn get-fig [fignum]
-  (ui-sync-exec
-    #(..
-       (get-page)
-       (findViewReference Figure/id (str fignum))
-       (getView true))))
 
 
-(defn get-fignum [fig]
-  (ui-sync-exec
-    #(Integer/parseInt
-       (.. fig (getViewSite) (getSecondaryId)))))
+
+(defn draw-scatter [#^GL gl data x-axfn y-axfn attrs]
+  (doto gl
+    (.glEnable GL/GL_BLEND)
+    (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
+    (.glEnable GL/GL_POINT_SMOOTH)
+    (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
+    (.glPointSize 10)
+    (.glColor4f 0.84 0.14 0.03 1))
+  
+  (.glBegin gl GL/GL_POINTS)
+  (dorun
+    (map
+      #(.glVertex2f gl (x-axfn %) (y-axfn %))
+      data))
+  (.glEnd gl))
 
 
-(defn add-plot [fig data-ref drawfn-ref]
-  (ui-sync-exec
-    #(Figure/add-plot fig data-ref drawfn-ref)))
-
-
-(defn draw-scatter
-  ([x-axfn y-axfn]
-    (fn [gl data]
-      (draw-scatter x-axfn y-axfn gl data)))
-  ([x-axfn y-axfn #^GL gl data]
-    (doto gl
-      (.glEnable GL/GL_BLEND)
-      (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
-      (.glEnable GL/GL_POINT_SMOOTH)
-      (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
-      (.glPointSize 10)
-      (.glColor4f 0.84 0.14 0.03 1))
-    
-    (.glBegin gl GL/GL_POINTS)
-    (dorun
-      (map
-        #(.glVertex2f gl (x-axfn %) (y-axfn %))
-        data))
-    (.glEnd gl)))
+(defn scatter-plot [fignum & data]
+  (plot fignum data {:x first :y second} draw-scatter))
