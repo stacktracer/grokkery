@@ -54,6 +54,22 @@
 
 
 
+(let [axkeys (ref {})]
+
+  (defn get-axkey [fignum axid]
+    (if-let [fig-axkeys (@axkeys fignum)]
+      (fig-axkeys axid)))
+  
+  
+  (defn set-axkey [fignum axid axkey]
+    (dosync
+      (alter axkeys
+        update-in [fignum]
+          assoc axid axkey))))
+
+
+
+
 (defn draw-plot [gl plot x-axkey y-axkey]
   (when-let [drawfn @(:drawfn plot)]
     (when-let [x-axfn (@(:axfns plot) x-axkey)]
@@ -62,10 +78,12 @@
 
 
 (defn draw-plots [gl fignum]
-  (dorun
-    (map
-      (fn [[_ plot]] (draw-plot gl plot :x :y))  ; XXX: Look up x-axkey and y-axkey by fignum
-      (get-plots fignum))))
+  (let [x-axkey (or (get-axkey fignum :x) :x)
+        y-axkey (or (get-axkey fignum :y) :y)]
+    (dorun
+      (map
+        (fn [[_ plot]] (draw-plot gl plot x-axkey y-axkey))
+        (get-plots fignum)))))
 
 
 
