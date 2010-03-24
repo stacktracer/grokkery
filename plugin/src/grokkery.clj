@@ -24,11 +24,13 @@
     (.glColor4f 0.84 0.14 0.03 1))
   
   (.glBegin gl GL/GL_POINTS)
-  (dorun
-    (map
-      #(.glVertex2f gl (x-axfn %) (y-axfn %))
-      data))
-  (.glEnd gl))
+  (try
+    (dorun
+      (map
+        #(.glVertex2f gl (x-axfn %) (y-axfn %))
+        data))
+    (finally
+      (.glEnd gl))))
 
 
 (defn scatter-plot [fignum & data]
