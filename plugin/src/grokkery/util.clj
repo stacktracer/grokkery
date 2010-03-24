@@ -35,3 +35,12 @@
     (getWorkbench)
     (getActiveWorkbenchWindow)
     (getActivePage)))
+
+
+(defmacro gl-draw [gl primitive & body]
+  `(do
+     (.glBegin ~gl ~primitive)
+     (try
+       ~@body
+       (finally
+         (.glEnd ~gl)))))

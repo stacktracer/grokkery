@@ -1,5 +1,6 @@
 (ns grokkery
   (:use
+    grokkery.util
     grokkery.plot)
   (:import
     [javax.media.opengl GL]))
@@ -23,14 +24,12 @@
     (.glPointSize 10)
     (.glColor4f 0.84 0.14 0.03 1))
   
-  (.glBegin gl GL/GL_POINTS)
-  (try
-    (dorun
-      (map
-        #(.glVertex2f gl (x-axfn %) (y-axfn %))
-        data))
-    (finally
-      (.glEnd gl))))
+  (gl-draw gl GL/GL_POINTS
+    (try
+      (dorun
+        (map
+          #(.glVertex2f gl (x-axfn %) (y-axfn %))
+          data)))))
 
 
 (defn scatter-plot [fignum & data]
