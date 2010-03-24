@@ -70,9 +70,9 @@
 
 
 
-(defn alter-plot-field [fignum plotnum key f & args]
+(defn alter-plot-field [fignum plotnum key f args]
   (dosync
-    (alter ((get-plot fignum plotnum) key) f args)))  ; XXX: Need to apply, I think
+    (alter ((get-plot fignum plotnum) key) #(apply f % args))))
 
 
 (defn set-plot-field [fignum plotnum key value]
@@ -87,11 +87,11 @@
 
 
 (defn alter-data [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :data f args))  ; XXX: Need to apply, I think
+  (alter-plot-field fignum plotnum :data f args))
 
 
 (defn alter-axfns [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :axfns f args))  ; XXX: Need to apply, I think
+  (alter-plot-field fignum plotnum :axfns f args))
 
 
 (defn put-axfn [fignum plotnum axkey axfn]
@@ -106,8 +106,8 @@
   (set-plot-field fignum plotnum :attrs attrs))
 
 
-(defn alter-attrs [fignum plotnum f args]
-  (alter-plot-field fignum plotnum :attrs f args))  ; XXX: Need to apply, I think
+(defn alter-attrs [fignum plotnum f & args]
+  (alter-plot-field fignum plotnum :attrs f args))
 
 
 (defn set-attr [fignum plotnum attrkey attr]
