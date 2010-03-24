@@ -1,6 +1,9 @@
 (ns user
   (:use
-    grokkery))
+    [grokkery]
+    [grokkery.plot]
+    [grokkery.FigureView :only [new-fig]]
+    [clojure.contrib.generic.math-functions]))
 
 
 (defn e []

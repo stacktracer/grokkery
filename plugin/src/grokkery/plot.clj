@@ -1,14 +1,4 @@
-(ns grokkery.plot
-  (:use
-    grokkery.util)
-  (:import
-    [javax.media.opengl GL GLContext]
-    [org.eclipse.swt.opengl GLCanvas]
-    [org.eclipse.swt SWT]
-    [org.eclipse.swt.graphics GC]
-    [org.eclipse.swt.widgets Canvas Listener Event Composite]
-    [glsimple GLSimpleListener]
-    [glsimple.swt GLSimpleSwtCanvas GLSimpleSwtAnimator]))
+(ns grokkery.plot)
 
 
 (let [plots (ref {})]

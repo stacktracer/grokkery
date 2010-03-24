@@ -27,12 +27,11 @@
     @used-fignum))
 
 
-(defn show-fig
-  ([]
-    (show-fig (take-fignum!)))
-  ([fignum]
-    (.showView (get-active-page) id (str fignum) IWorkbenchPage/VIEW_VISIBLE)
-    fignum))
+(defn new-fig []
+  (ui-sync-exec
+    #(let [fignum (take-fignum!)]
+       (.showView (get-active-page) id (str fignum) IWorkbenchPage/VIEW_VISIBLE)
+       fignum)))
 
 
 (defn get-fignum [#^IViewPart fig]

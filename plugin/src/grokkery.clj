@@ -1,12 +1,8 @@
 (ns grokkery
   (:use
-    [grokkery FigureView plot])
-  (:use
-    grokkery.util)
+    grokkery.plot)
   (:import
     [javax.media.opengl GL]))
-
-
 
 
 (defn plot
@@ -15,11 +11,7 @@
   ([fignum data axfns drawfn]
     (plot fignum data axfns drawfn {}))
   ([fignum data axfns drawfn attrs]
-    (ui-sync-exec
-      #(add-plot fignum (ref data) (ref axfns) (ref drawfn) (ref attrs)))))
-
-
-
+    (add-plot fignum (ref data) (ref axfns) (ref drawfn) (ref attrs))))
 
 
 (defn draw-scatter [#^GL gl data x-axfn y-axfn attrs]
