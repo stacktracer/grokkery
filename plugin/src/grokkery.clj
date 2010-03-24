@@ -1,6 +1,6 @@
 (ns grokkery
-  (:require
-    [grokkery.figure :as figure])
+  (:use
+    [grokkery FigureView plot])
   (:use
     grokkery.util)
   (:import

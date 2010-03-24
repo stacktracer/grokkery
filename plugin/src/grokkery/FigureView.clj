@@ -1,9 +1,9 @@
 (ns grokkery.FigureView
   (:use
-    grokkery.util
-    grokkery.figure)
+    [grokkery util plot])
   (:import
     [javax.media.opengl GL GLContext]
+    [org.eclipse.ui IWorkbenchPage IViewPart]
     [org.eclipse.swt.opengl GLCanvas]
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics GC]
@@ -18,6 +18,28 @@
 
 
 (def id "grokkery.FigureView")
+
+
+(let [used-fignum (ref -1)]
+  (defn- take-fignum! []
+    (dosync
+      (alter used-fignum inc))
+    @used-fignum))
+
+
+(defn show-fig
+  ([]
+    (show-fig (take-fignum!)))
+  ([fignum]
+    (.showView (get-active-page) id (str fignum) IWorkbenchPage/VIEW_VISIBLE)
+    fignum))
+
+
+(defn get-fignum [#^IViewPart fig]
+  (Integer/parseInt
+    (.. fig (getViewSite) (getSecondaryId))))
+
+
 
 
 (defn -init-instance []

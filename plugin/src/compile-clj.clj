@@ -5,7 +5,7 @@
       ['grokkery.GrokkeryService
        'grokkery.GrokkeryPlugin
        'grokkery.ReplConsole
-       'grokkery.Figure
+       'grokkery.FigureView
        'grokkery.Perspective
        'grokkery.GrokkeryApp
        'grokkery])))

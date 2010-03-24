@@ -1,6 +1,4 @@
-(ns grokkery.figure
-  (:require
-    [grokkery.FigureView :as FigureView])
+(ns grokkery.plot
   (:use
     grokkery.util)
   (:import
@@ -11,29 +9,6 @@
     [org.eclipse.swt.widgets Canvas Listener Event Composite]
     [glsimple GLSimpleListener]
     [glsimple.swt GLSimpleSwtCanvas GLSimpleSwtAnimator]))
-
-
-
-(let [used-fignum (ref -1)]
-  (defn- take-fignum! []
-    (dosync
-      (alter used-fignum inc))
-    @used-fignum))
-
-
-(defn show-fig
-  ([]
-    (show-fig (take-fignum!)))
-  ([fignum]
-    (.showView (get-active-page) FigureView/id (str fignum) IWorkbenchPage/VIEW_VISIBLE)
-    fignum))
-
-
-(defn get-fignum [figure-view]
-  (Integer/parseInt
-    (.. figure-view (getViewSite) (getSecondaryId))))
-
-
 
 
 (let [plots (ref {})]
@@ -74,7 +49,7 @@
   
   
   (defn get-plot [fignum plotnum]
-    ((get-plots) plotnum)))
+    ((get-plots fignum) plotnum)))
 
 
 
@@ -97,7 +72,7 @@
 
 (defn alter-plot-field [fignum plotnum key f & args]
   (dosync
-    (alter ((get-plot fignum plotnum) key) f args)))
+    (alter ((get-plot fignum plotnum) key) f args)))  ; XXX: Need to apply, I think
 
 
 (defn set-plot-field [fignum plotnum key value]
@@ -112,11 +87,11 @@
 
 
 (defn alter-data [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :data f args))
+  (alter-plot-field fignum plotnum :data f args))  ; XXX: Need to apply, I think
 
 
 (defn alter-axfns [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :axfns f args))
+  (alter-plot-field fignum plotnum :axfns f args))  ; XXX: Need to apply, I think
 
 
 (defn put-axfn [fignum plotnum axkey axfn]
@@ -132,7 +107,7 @@
 
 
 (defn alter-attrs [fignum plotnum f args]
-  (alter-plot-field fignum plotnum :attrs f args))
+  (alter-plot-field fignum plotnum :attrs f args))  ; XXX: Need to apply, I think
 
 
 (defn set-attr [fignum plotnum attrkey attr]

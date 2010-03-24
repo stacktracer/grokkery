@@ -23,8 +23,8 @@
          point="org.eclipse.ui.views">
       <view
             allowMultiple="true"
-            class="grokkery.Figure"
-            id="grokkery.Figure"
+            class="grokkery.FigureView"
+            id="grokkery.FigureView"
             name="Figure">
       </view>
    </extension>
