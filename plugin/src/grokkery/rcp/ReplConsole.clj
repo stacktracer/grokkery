@@ -39,7 +39,7 @@
     (.setColor in (Color. nil 0 0 0))
     (.setColor out (Color. nil 0 0 192))
     (.setColor err (Color. nil 255 0 0))
-    (.setColor prompt-out (Color. nil 0 160 80))
+    (.setColor prompt-out (Color. nil 0 160 32))
     
     (doto
       (Thread.
