@@ -7,85 +7,78 @@
     (defn- take-plotnum! [fignum]
       (dosync
         (alter used-plotnums
-          update-in [fignum]
-            #(if % (inc %) 0))
+          update-in [fignum] #(if % (inc %) 0))
         (@used-plotnums fignum))))
   
   
-  (defn add-plot [fignum data-ref axfns-ref drawfn-ref attrs-ref]
+  (defn add-plot [fignum data axfns drawfn attrs]
     (dosync
       (let [plotnum (take-plotnum! fignum)
             plot {:fig fignum
                   :plot plotnum
-                  :data data-ref
-                  :axfns axfns-ref
-                  :drawfn drawfn-ref
-                  :attrs attrs-ref}]
+                  :data data
+                  :axfns axfns
+                  :drawfn drawfn
+                  :attrs attrs}]
         (alter plots
-          update-in [fignum]
-            assoc plotnum plot)
+          assoc-in [fignum :plots plotnum] plot)
         plot)))
   
   
   (defn remove-plot [fignum plotnum]
     (dosync
       (alter plots
-        update-in [fignum]
-          dissoc plotnum)))
+        update-in [fignum :plots] dissoc plotnum)))
+  
+  
+  (defn alter-plot-field [fignum plotnum key f args]
+    (dosync
+      (alter plots
+        update-in [fignum :plots plotnum key] #(apply f % args))))
+  
+  
+  (defn set-plot-field [fignum plotnum key value]
+    (dosync
+      (alter plots
+        assoc-in [fignum :plots plotnum key] value)))
+  
+  
+  (defn set-axkeys [fignum x-axkey y-axkey]
+    (dosync
+      (alter plots
+        assoc-in [fignum :axkeys :horizontal] x-axkey)
+      (alter plots
+        assoc-in [fignum :axkeys :vertical] y-axkey)))
+  
+  
+  (defn get-axkey [fignum axid]
+    (get-in @plots [fignum :axkeys axid]))
   
   
   (defn get-plots [fignum]
-    (@plots fignum))
+    (get-in @plots [fignum :plots]))
   
   
   (defn get-plot [fignum plotnum]
-    ((get-plots fignum) plotnum)))
-
-
-
-
-(let [axkeys (ref {})]
-
-  (defn get-axkey [fignum axid]
-    (if-let [fig-axkeys (@axkeys fignum)]
-      (fig-axkeys axid)))
-  
-  
-  (defn set-axkey [fignum axid axkey]
-    (dosync
-      (alter axkeys
-        update-in [fignum]
-          assoc axid axkey))))
+    (get-in @plots [fignum :plots plotnum])))
 
 
 
 
 (defn draw-plot [gl plot x-axkey y-axkey]
-  (when-let [drawfn @(:drawfn plot)]
-    (when-let [x-axfn (@(:axfns plot) x-axkey)]
-      (when-let [y-axfn (@(:axfns plot) y-axkey)]
-        (drawfn gl @(:data plot) x-axfn y-axfn @(:attrs plot))))))
+  (when-let [drawfn (:drawfn plot)]
+    (when-let [x-axfn (get (:axfns plot) x-axkey)]
+      (when-let [y-axfn (get (:axfns plot) y-axkey)]
+        (drawfn gl (:data plot) x-axfn y-axfn (:attrs plot))))))
 
 
 (defn draw-plots [gl fignum]
-  (let [x-axkey (or (get-axkey fignum :x) :x)
-        y-axkey (or (get-axkey fignum :y) :y)]
+  (let [x-axkey (or (get-axkey fignum :horizontal) :x)
+        y-axkey (or (get-axkey fignum :vertical) :y)]
     (dorun
       (map
         (fn [[_ plot]] (draw-plot gl plot x-axkey y-axkey))
         (get-plots fignum)))))
-
-
-
-
-(defn alter-plot-field [fignum plotnum key f args]
-  (dosync
-    (alter ((get-plot fignum plotnum) key) #(apply f % args))))
-
-
-(defn set-plot-field [fignum plotnum key value]
-  (dosync
-    (ref-set ((get-plot fignum plotnum) key) value)))
 
 
 

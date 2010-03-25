@@ -6,15 +6,6 @@
     [javax.media.opengl GL]))
 
 
-(defn plot
-  ([fignum]
-    (plot fignum [] {} nil {}))
-  ([fignum data axfns drawfn]
-    (plot fignum data axfns drawfn {}))
-  ([fignum data axfns drawfn attrs]
-    (add-plot fignum (ref data) (ref axfns) (ref drawfn) (ref attrs))))
-
-
 (defn draw-scatter [#^GL gl data x-axfn y-axfn attrs]
   (doto gl
     (.glEnable GL/GL_BLEND)
@@ -32,5 +23,5 @@
           data)))))
 
 
-(defn scatter-plot [fignum & data]
-  (plot fignum data {:x first :y second} draw-scatter))
+(defn scatter-plot [fignum data]
+  (add-plot fignum data {:x first :y second} draw-scatter {}))
