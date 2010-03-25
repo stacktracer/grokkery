@@ -1,6 +1,6 @@
-(ns grokkery.Perspective
+(ns grokkery.rcp.Perspective
   (:require
-    [grokkery.FigureView :as FigureView])
+    [grokkery.rcp.FigureView :as FigureView])
   (:use
     clojure.contrib.import-static)
   (:gen-class
@@ -10,7 +10,7 @@
 (import-static org.eclipse.ui.console.IConsoleConstants ID_CONSOLE_VIEW)
 
 
-(def id "grokkery.Perspective")
+(def id "grokkery.rcp.Perspective")
 
 
 (defn set-uncloseable [layout view-id]

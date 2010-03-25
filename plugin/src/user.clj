@@ -2,7 +2,7 @@
   (:use
     [grokkery]
     [grokkery.plot]
-    [grokkery.FigureView :only [new-fig]]
+    [grokkery.rcp.FigureView :only [new-fig]]
     [clojure.contrib.generic.math-functions]))
 
 

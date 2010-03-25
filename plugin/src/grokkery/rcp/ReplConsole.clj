@@ -1,4 +1,4 @@
-(ns grokkery.ReplConsole
+(ns grokkery.rcp.ReplConsole
   (:require
     clojure.main)
   (:import

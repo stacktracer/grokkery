@@ -7,7 +7,7 @@
          point="org.eclipse.core.runtime.applications">
       <application>
          <run
-               class="grokkery.GrokkeryApp">
+               class="grokkery.rcp.GrokkeryApp">
          </run>
       </application>
    </extension>
@@ -15,16 +15,16 @@
          point="org.eclipse.ui.perspectives">
       <perspective
             name="Perspective"
-            class="grokkery.Perspective"
-            id="grokkery.Perspective">
+            class="grokkery.rcp.Perspective"
+            id="grokkery.rcp.Perspective">
       </perspective>
    </extension>
    <extension
          point="org.eclipse.ui.views">
       <view
             allowMultiple="true"
-            class="grokkery.FigureView"
-            id="grokkery.FigureView"
+            class="grokkery.rcp.FigureView"
+            id="grokkery.rcp.FigureView"
             name="Figure">
       </view>
    </extension>

@@ -1,8 +1,8 @@
-(ns grokkery.GrokkeryApp
+(ns grokkery.rcp.GrokkeryApp
   (:require
-    [grokkery.Perspective :as Perspective])
+    [grokkery.rcp.Perspective :as Perspective])
   (:import
-    [grokkery ReplConsole]
+    [grokkery.rcp ReplConsole]
     [org.eclipse.equinox.app IApplication IApplicationContext]
     [org.eclipse.swt.widgets Display]
     [org.eclipse.swt.graphics Point]

@@ -1,4 +1,4 @@
-(ns grokkery.GrokkeryService
+(ns grokkery.rcp.GrokkeryService
   (:gen-class
     :methods [[expose [Object String] void]]))
 

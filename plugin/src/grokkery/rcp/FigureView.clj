@@ -1,4 +1,4 @@
-(ns grokkery.FigureView
+(ns grokkery.rcp.FigureView
   (:use
     [grokkery util plot])
   (:import
@@ -17,7 +17,7 @@
     :exposes-methods {init superInit}))
 
 
-(def id "grokkery.FigureView")
+(def id "grokkery.rcp.FigureView")
 
 
 (let [used-fignum (ref -1)]

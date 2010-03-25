@@ -2,10 +2,10 @@
 (binding [*compile-path* "/home/mike/projects/grokkery/code/plugin/build/classes/"]
   (dorun
     (map compile
-      ['grokkery.GrokkeryService
-       'grokkery.GrokkeryPlugin
-       'grokkery.ReplConsole
-       'grokkery.FigureView
-       'grokkery.Perspective
-       'grokkery.GrokkeryApp
+      ['grokkery.rcp.GrokkeryService
+       'grokkery.rcp.GrokkeryPlugin
+       'grokkery.rcp.ReplConsole
+       'grokkery.rcp.FigureView
+       'grokkery.rcp.Perspective
+       'grokkery.rcp.GrokkeryApp
        'grokkery])))

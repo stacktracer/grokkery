@@ -1,9 +1,9 @@
-(ns grokkery.GrokkeryPlugin
+(ns grokkery.rcp.GrokkeryPlugin
   (:import
     [java.util Properties]
     [org.eclipse.ui.plugin AbstractUIPlugin]
     [org.eclipse.jface.resource ImageDescriptor]
-    [grokkery GrokkeryService])
+    [grokkery.rcp GrokkeryService])
   (:gen-class
     :extends org.eclipse.ui.plugin.AbstractUIPlugin
     :exposes-methods {start superStart

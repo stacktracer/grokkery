@@ -65,7 +65,7 @@ public class Grokkery
                                                   "eclipse.consoleLog", "true",
                                                   "eclipse.application", "grokkery.application" };
     
-    private static final String serviceName = "grokkery.GrokkeryService";
+    private static final String serviceName = "grokkery.rcp.GrokkeryService";
     
     
     private static class Exposure
