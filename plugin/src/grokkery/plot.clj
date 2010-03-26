@@ -11,13 +11,13 @@
         (@used-plotnums fignum))))
   
   
-  (defn add-plot [fignum data axfns drawfn attrs]
+  (defn add-plot [fignum data coords drawfn attrs]
     (dosync
       (let [plotnum (take-plotnum! fignum)
             plot {:fig fignum
                   :plot plotnum
                   :data data
-                  :axfns axfns
+                  :coords coords
                   :drawfn drawfn
                   :attrs attrs}]
         (alter plots
@@ -43,16 +43,17 @@
         assoc-in [fignum :plots plotnum key] value)))
   
   
-  (defn set-axkeys [fignum x-axkey y-axkey]
+  (defn set-axis-coordkeys [fignum xaxis-coordkey yaxis-coordkey]
     (dosync
+      ; Something like merge {:bottom x-coordkey :left y-coordkey} might be cleaner
       (alter plots
-        assoc-in [fignum :axkeys :horizontal] x-axkey)
+        assoc-in [fignum :axis-coordkeys :bottom] xaxis-coordkey)
       (alter plots
-        assoc-in [fignum :axkeys :vertical] y-axkey)))
+        assoc-in [fignum :axis-coordkeys :left] yaxis-coordkey)))
   
   
-  (defn get-axkey [fignum axid]
-    (get-in @plots [fignum :axkeys axid]))
+  (defn get-axis-coordkey [fignum axiskey]
+    (get-in @plots [fignum :axis-coordkeys axiskey]))
   
   
   (defn get-plots [fignum]
@@ -65,19 +66,19 @@
 
 
 
-(defn draw-plot [gl plot x-axkey y-axkey]
+(defn draw-plot [gl plot xaxis-coordkey yaxis-coordkey]
   (when-let [drawfn (:drawfn plot)]
-    (when-let [x-axfn (get (:axfns plot) x-axkey)]
-      (when-let [y-axfn (get (:axfns plot) y-axkey)]
-        (drawfn gl (:data plot) x-axfn y-axfn (:attrs plot))))))
+    (when-let [x-coordfn (get (:coords plot) xaxis-coordkey)]
+      (when-let [y-coordfn (get (:coords plot) yaxis-coordkey)]
+        (drawfn gl (:data plot) x-coordfn y-coordfn (:attrs plot))))))
 
 
 (defn draw-plots [gl fignum]
-  (let [x-axkey (or (get-axkey fignum :horizontal) :x)
-        y-axkey (or (get-axkey fignum :vertical) :y)]
+  (let [xaxis-coordkey (or (get-axis-coordkey fignum :bottom) :x)
+        yaxis-coordkey (or (get-axis-coordkey fignum :left) :y)]
     (dorun
       (map
-        (fn [[_ plot]] (draw-plot gl plot x-axkey y-axkey))
+        (fn [[_ plot]] (draw-plot gl plot xaxis-coordkey yaxis-coordkey))
         (get-plots fignum)))))
 
 
@@ -91,12 +92,12 @@
   (alter-plot-field fignum plotnum :data f args))
 
 
-(defn alter-axfns [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :axfns f args))
+(defn alter-coords [fignum plotnum f & args]
+  (alter-plot-field fignum plotnum :coords f args))
 
 
-(defn put-axfn [fignum plotnum axkey axfn]
-  (alter-axfns fignum plotnum assoc axkey axfn))
+(defn def-coord [fignum plotnum coordkey coordfn]
+  (alter-coords fignum plotnum assoc coordkey coordfn))
 
 
 (defn set-drawfn [fignum plotnum drawfn]
