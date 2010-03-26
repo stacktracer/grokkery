@@ -44,12 +44,10 @@
   
   
   (defn set-axis-coordkeys [fignum xaxis-coordkey yaxis-coordkey]
-    (dosync
-      ; Something like merge {:bottom x-coordkey :left y-coordkey} might be cleaner
-      (alter plots
-        assoc-in [fignum :axis-coordkeys :bottom] xaxis-coordkey)
-      (alter plots
-        assoc-in [fignum :axis-coordkeys :left] yaxis-coordkey)))
+    (let [updates {:bottom xaxis-coordkey :left yaxis-coordkey}]
+      (dosync
+        (alter plots
+          update-in [fignum :axis-coordkeys] merge updates))))
   
   
   (defn get-axis-coordkey [fignum axiskey]
