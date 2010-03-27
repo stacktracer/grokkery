@@ -16,13 +16,25 @@
   (.glColor4f gl (c 0) (c 1) (c 2) (c 3)))
 
 
+(defn setup [#^GL gl & args]
+  (let [argset (set args)]
+    (when (some argset [:blend :nice-points :nice-lines])
+      (doto gl
+        (.glEnable GL/GL_BLEND)
+        (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)))
+    (when (argset :nice-points)
+      (doto gl
+        (.glEnable GL/GL_POINT_SMOOTH)
+        (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)))
+    (when (argset :nice-lines)
+      (doto gl
+        (.glEnable GL/GL_LINE_SMOOTH)
+        (.glHint GL/GL_LINE_SMOOTH_HINT GL/GL_NICEST)))))
+
+
 (defn scatter-setup [#^GL gl attrs]
-  (doto gl
-    (.glEnable GL/GL_BLEND)
-    (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
-    (.glEnable GL/GL_POINT_SMOOTH)
-    (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
-    (.glPointSize (or (:pointsize attrs) default-pointsize)))
+  (setup gl :nice-points)
+  (.glPointSize gl (or (:pointsize attrs) default-pointsize))
   (when-not (:colorfn attrs)
     (set-color gl (or (:color attrs) default-color))))
 
