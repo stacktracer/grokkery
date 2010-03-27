@@ -1,8 +1,8 @@
 (ns user
   (:use
-    [grokkery]
-    [grokkery.plot]
+    [grokkery.core]
     [grokkery.rcp.FigureView :only [new-fig]]
+    [grokkery]
     [clojure.contrib.generic.math-functions]))
 
 

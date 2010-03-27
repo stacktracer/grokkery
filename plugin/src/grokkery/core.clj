@@ -1,4 +1,4 @@
-(ns grokkery.plot)
+(ns grokkery.core)
 
 
 (let [figs (ref {})]

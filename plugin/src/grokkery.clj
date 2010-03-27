@@ -1,7 +1,7 @@
 (ns grokkery
   (:use
     grokkery.util
-    grokkery.plot)
+    grokkery.core)
   (:import
     [javax.media.opengl GL]))
 
