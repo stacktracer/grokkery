@@ -61,24 +61,77 @@
   
   
   (defn get-axis [fignum axiskey]
-    (get-in @figs [fignum :axes axiskey])))
+    (get-in @figs [fignum :axes axiskey]))
+  
+  
+  
+  
+  (defn alter-coordlims [fignum coordkey f args]
+    (dosync
+      (alter figs
+        update-in [fignum :limits coordkey] #(apply f % args))))
+  
+  
+  (defn alter-coordmin [fignum coordkey f args]
+    (dosync
+      (alter figs
+        update-in [fignum :limits coordkey :min] #(apply f % args))))
+  
+  
+  (defn alter-coordmax [fignum coordkey f args]
+    (dosync
+      (alter figs
+        update-in [fignum :limits coordkey :max] #(apply f % args))))
+  
+  
+  (defn set-coordlims [fignum coordkey coordmin coordmax]
+    (let [coordlims {:min coordmin :max coordmax}]
+      (dosync
+        (alter figs
+          assoc-in [fignum :limits coordkey] coordlims))))
+  
+  
+  (defn set-coordmin [fignum coordkey coordmin]
+    (dosync
+      (alter figs
+        assoc-in [fignum :limits coordkey :min] coordmin)))
+  
+  
+  (defn set-coordmax [fignum coordkey coordmax]
+    (dosync
+      (alter figs
+        assoc-in [fignum :limits coordkey :max] coordmax)))
+  
+  
+  (defn get-coordlims [fignum coordkey]
+    (or
+      (get-in @figs [fignum :limits coordkey])
+      {:min 0 :max 1}))
+  
+  
+  (defn get-coordmin [fignum coordkey]
+    (:min (get-coordlims fignum coordkey)))
+  
+  
+  (defn get-coordmax [fignum coordkey]
+    (:max (get-coordlims fignum coordkey))))
 
 
 
 
-(defn draw-plot [gl plot xaxis-coordkey yaxis-coordkey]
+(defn draw-plot [gl plot bottom-coordkey left-coordkey]
   (when-let [drawfn (:drawfn plot)]
-    (when-let [x-coordfn (get (:coords plot) xaxis-coordkey)]
-      (when-let [y-coordfn (get (:coords plot) yaxis-coordkey)]
+    (when-let [x-coordfn (get (:coords plot) bottom-coordkey)]
+      (when-let [y-coordfn (get (:coords plot) left-coordkey)]
         (drawfn gl (:data plot) x-coordfn y-coordfn (:attrs plot))))))
 
 
 (defn draw-plots [gl fignum]
-  (let [xaxis-coordkey (or (get-axis fignum :bottom) :x)
-        yaxis-coordkey (or (get-axis fignum :left) :y)]
+  (let [bottom-coordkey (or (get-axis fignum :bottom) :x)
+        left-coordkey (or (get-axis fignum :left) :y)]
     (dorun
       (map
-        (fn [[_ plot]] (draw-plot gl plot xaxis-coordkey yaxis-coordkey))
+        (fn [[_ plot]] (draw-plot gl plot bottom-coordkey left-coordkey))
         (get-plots fignum)))))
 
 
