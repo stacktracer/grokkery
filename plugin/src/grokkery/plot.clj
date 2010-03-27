@@ -43,15 +43,15 @@
         assoc-in [fignum :plots plotnum key] value)))
   
   
-  (defn set-axis-coordkeys [fignum xaxis-coordkey yaxis-coordkey]
+  (defn set-axes [fignum xaxis-coordkey yaxis-coordkey]
     (let [updates {:bottom xaxis-coordkey :left yaxis-coordkey}]
       (dosync
         (alter plots
-          update-in [fignum :axis-coordkeys] merge updates))))
+          update-in [fignum :axes] merge updates))))
   
   
-  (defn get-axis-coordkey [fignum axiskey]
-    (get-in @plots [fignum :axis-coordkeys axiskey]))
+  (defn get-axis [fignum axiskey]
+    (get-in @plots [fignum :axes axiskey]))
   
   
   (defn get-plots [fignum]
@@ -72,8 +72,8 @@
 
 
 (defn draw-plots [gl fignum]
-  (let [xaxis-coordkey (or (get-axis-coordkey fignum :bottom) :x)
-        yaxis-coordkey (or (get-axis-coordkey fignum :left) :y)]
+  (let [xaxis-coordkey (or (get-axis fignum :bottom) :x)
+        yaxis-coordkey (or (get-axis fignum :left) :y)]
     (dorun
       (map
         (fn [[_ plot]] (draw-plot gl plot xaxis-coordkey yaxis-coordkey))
