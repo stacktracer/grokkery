@@ -1,7 +1,7 @@
 (ns grokkery.plot)
 
 
-(let [plots (ref {})]
+(let [figs (ref {})]
 
   (let [used-plotnums (ref {})]
     (defn- take-plotnum! [fignum]
@@ -20,46 +20,48 @@
                   :coords coords
                   :drawfn drawfn
                   :attrs attrs}]
-        (alter plots
+        (alter figs
           assoc-in [fignum :plots plotnum] plot)
         plot)))
   
   
   (defn remove-plot [fignum plotnum]
     (dosync
-      (alter plots
+      (alter figs
         update-in [fignum :plots] dissoc plotnum)))
   
   
   (defn alter-plot-field [fignum plotnum key f args]
     (dosync
-      (alter plots
+      (alter figs
         update-in [fignum :plots plotnum key] #(apply f % args))))
   
   
   (defn set-plot-field [fignum plotnum key value]
     (dosync
-      (alter plots
+      (alter figs
         assoc-in [fignum :plots plotnum key] value)))
+  
+  
+  (defn get-plots [fignum]
+    (get-in @figs [fignum :plots]))
+  
+  
+  (defn get-plot [fignum plotnum]
+    (get-in @figs [fignum :plots plotnum]))
+  
+  
   
   
   (defn set-axes [fignum xaxis-coordkey yaxis-coordkey]
     (let [updates {:bottom xaxis-coordkey :left yaxis-coordkey}]
       (dosync
-        (alter plots
+        (alter figs
           update-in [fignum :axes] merge updates))))
   
   
   (defn get-axis [fignum axiskey]
-    (get-in @plots [fignum :axes axiskey]))
-  
-  
-  (defn get-plots [fignum]
-    (get-in @plots [fignum :plots]))
-  
-  
-  (defn get-plot [fignum plotnum]
-    (get-in @plots [fignum :plots plotnum])))
+    (get-in @figs [fignum :axes axiskey])))
 
 
 
