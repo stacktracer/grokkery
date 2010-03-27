@@ -37,6 +37,10 @@
     (getActivePage)))
 
 
+(defn mouse-button-down? [event]
+	(not (zero? (bit-and (.stateMask event) SWT/BUTTON_MASK))))
+
+
 (defmacro gl-draw [gl primitive & body]
   `(do
      (.glBegin ~gl ~primitive)
