@@ -3,17 +3,20 @@
 
 (let [figs (ref {})]
 
-  (let [used-plotnums (ref {})]
-    (defn- take-plotnum! [fignum]
-      (dosync
-        (alter used-plotnums
-          update-in [fignum] #(if % (inc %) 0))
-        (@used-plotnums fignum))))
+  (defn get-fig [fignum]
+    (@figs fignum))
+  
+  
+  (defn find-unused-plotnum [fig]
+    (first
+      (filter
+        (complement (set (keys (:plots (get-fig 0)))))
+        (iterate inc 0))))
   
   
   (defn add-plot [fignum data coords drawfn attrs]
     (dosync
-      (let [plotnum (take-plotnum! fignum)
+      (let [plotnum (find-unused-plotnum (get-fig fignum))
             plot {:fig fignum
                   :plot plotnum
                   :data data
@@ -97,11 +100,7 @@
   (defn set-coordmax [fignum coordkey coordmax]
     (dosync
       (alter figs
-        assoc-in [fignum :limits coordkey :max] coordmax)))
-  
-  
-  (defn get-fig [fignum]
-    (@figs fignum)))
+        assoc-in [fignum :limits coordkey :max] coordmax))))
 
 
 
