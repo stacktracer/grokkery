@@ -84,6 +84,7 @@
         update-in [fignum :limits coordkey :max] #(apply f % args))))
   
   
+  ; Accept lims for multiple coords (set-coordlims 0 :x [0 1] :y [-2 2])
   (defn set-coordlims [fignum coordkey coordmin coordmax]
     (let [coordlims {:min coordmin :max coordmax}]
       (dosync
@@ -109,10 +110,6 @@
   (get-in fig [:plots plotnum]))
 
 
-(defn get-axis [fig axiskey]
-  (get-in fig [:axes axiskey]))
-
-
 (defn get-coordlims [fig coordkey]
   (get-in fig [:limits coordkey]))
 
@@ -125,6 +122,11 @@
   (:max (get-coordlims fig coordkey)))
 
 
+(defn get-axis [fig axiskey default-coordkey]
+  (let [coordkey (or (get-in fig [:axes axiskey]) default-coordkey)]
+    (assoc
+      (get-coordlims fig coordkey)
+      :coord coordkey)))
 
 
 (defn set-data [fignum plotnum data]
@@ -157,18 +159,18 @@
 
 
 
-(defn draw-plot [gl plot bottom-coordkey left-coordkey]
+(defn draw-plot [gl plot bottom-axis left-axis]
   (when-let [drawfn (:drawfn plot)]
-    (when-let [x-coordfn (get (:coords plot) bottom-coordkey)]
-      (when-let [y-coordfn (get (:coords plot) left-coordkey)]
-        (drawfn gl (:data plot) x-coordfn y-coordfn (:attrs plot))))))
+    (when-let [bottom-coordfn (get (:coords plot) (:coord bottom-axis))]
+      (when-let [left-coordfn (get (:coords plot) (:coord left-axis))]
+        (drawfn gl (:data plot) bottom-axis bottom-coordfn left-axis left-coordfn (:attrs plot))))))
 
 
 (defn draw-plots [gl fignum]
   (when-let [fig (get-fig fignum)]
-    (let [bottom-coordkey (or (get-axis fig :bottom) :x)
-          left-coordkey (or (get-axis fig :left) :y)]
+    (let [bottom-axis (get-axis fig :bottom :x)
+          left-axis (get-axis fig :left :y)]
       (dorun
         (map
-          (fn [[_ plot]] (draw-plot gl plot bottom-coordkey left-coordkey))
+          (fn [[_ plot]] (draw-plot gl plot bottom-axis left-axis))
           (:plots fig))))))
