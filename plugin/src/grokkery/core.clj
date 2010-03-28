@@ -31,7 +31,7 @@
         update-in [fignum :plots] dissoc plotnum)))
   
   
-  (defn alter-plot-field [fignum plotnum key f args]
+  (defn update-plot-field [fignum plotnum key f args]
     (dosync
       (alter figs
         update-in [fignum :plots plotnum key] #(apply f % args))))
@@ -44,7 +44,7 @@
   
   
   ; Awkward to use directly without varags
-  (defn alter-attr [fignum plotnum attrkey f args]
+  (defn update-attr [fignum plotnum attrkey f args]
     (dosync
       (alter figs
         update-in [fignum :plots plotnum :attrs attrkey] #(apply f % args))))
@@ -63,19 +63,19 @@
           update-in [fignum :axes] merge updates))))
   
   
-  (defn alter-coordlims [fignum coordkey f args]
+  (defn update-coordlims [fignum coordkey f args]
     (dosync
       (alter figs
         update-in [fignum :limits coordkey] #(apply f % args))))
   
   
-  (defn alter-coordmin [fignum coordkey f args]
+  (defn update-coordmin [fignum coordkey f args]
     (dosync
       (alter figs
         update-in [fignum :limits coordkey :min] #(apply f % args))))
   
   
-  (defn alter-coordmax [fignum coordkey f args]
+  (defn update-coordmax [fignum coordkey f args]
     (dosync
       (alter figs
         update-in [fignum :limits coordkey :max] #(apply f % args))))
@@ -132,16 +132,16 @@
   (set-plot-field fignum plotnum :data data))
 
 
-(defn alter-data [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :data f args))
+(defn update-data [fignum plotnum f & args]
+  (update-plot-field fignum plotnum :data f args))
 
 
-(defn alter-coords [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :coords f args))
+(defn update-coords [fignum plotnum f & args]
+  (update-plot-field fignum plotnum :coords f args))
 
 
 (defn def-coord [fignum plotnum coordkey coordfn]
-  (alter-coords fignum plotnum assoc coordkey coordfn))
+  (update-coords fignum plotnum assoc coordkey coordfn))
 
 
 (defn set-drawfn [fignum plotnum drawfn]
@@ -152,8 +152,8 @@
   (set-plot-field fignum plotnum :attrs attrs))
 
 
-(defn alter-attrs [fignum plotnum f & args]
-  (alter-plot-field fignum plotnum :attrs f args))
+(defn update-attrs [fignum plotnum f & args]
+  (update-plot-field fignum plotnum :attrs f args))
 
 
 
