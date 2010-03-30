@@ -3,7 +3,8 @@
     [org.eclipse.swt SWT]
     [org.eclipse.swt.widgets Listener Display]
     [org.eclipse.swt.events VerifyListener VerifyEvent]
-    [org.eclipse.ui PlatformUI]))
+    [org.eclipse.ui PlatformUI]
+    [javax.media.opengl GL]))
 
 
 (defn or-flags [& flags]
@@ -41,6 +42,10 @@
 	(not (zero? (bit-and (.stateMask event) SWT/BUTTON_MASK))))
 
 
+(defn gl-set-color [#^GL gl c]
+  (.glColor4f gl (c 0) (c 1) (c 2) (c 3)))
+
+
 (defmacro gl-draw [gl primitive & body]
   `(do
      (.glBegin ~gl ~primitive)
@@ -48,3 +53,22 @@
        ~@body
        (finally
          (.glEnd ~gl)))))
+
+
+(defmacro gl-push-all [gl & body]
+  `(do
+     (doto ~gl
+       (.glPushAttrib ~GL/GL_ALL_ATTRIB_BITS)
+       (.glMatrixMode ~GL/GL_MODELVIEW)
+       (.glPushMatrix)
+       (.glMatrixMode ~GL/GL_PROJECTION)
+       (.glPushMatrix))
+     (try
+       ~@body
+       (finally
+         (doto ~gl
+           (.glMatrixMode ~GL/GL_MODELVIEW)
+           (.glPopMatrix)
+           (.glMatrixMode ~GL/GL_PROJECTION)
+           (.glPopMatrix)
+           (.glPopAttrib))))))

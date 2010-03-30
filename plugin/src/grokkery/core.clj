@@ -159,11 +159,55 @@
 
 
 
+
+
+
+
+
+; Try destructuring args
+(defn get-limits [x-axis y-axis]
+  (let [xmin (:min x-axis)
+        xmax (:max x-axis)
+        ymin (:min y-axis)
+        ymax (:max y-axis)]
+    (merge
+      (if (some nil? [xmin xmax]) {:xmin 0 :xmax 1} {:xmin xmin :xmax xmax})
+      (if (some nil? [ymin ymax]) {:ymin 0 :ymax 1} {:ymin ymin :ymax ymax}))))
+
+
+(defn prep-plot [#^GL gl attrs]
+  (.glPointSize gl (or (:pointsize attrs) default-pointsize)
+  (gl-set-color gl (or (:color attrs) default-color)))
+  (let [xmin
+        xmax
+        ymin
+        ymax]
+  
+    (doto gl
+      (.glMatrixMode GL/GL_PROJECTION)
+      (.glLoadIdentity)
+      (.glOrtho xmin xmax ymin ymax -1 1)
+      (.glMatrixMode GL/GL_MODELVIEW)
+      (.glLoadIdentity)
+      
+      (.glEnable GL/GL_BLEND)
+      (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
+      
+      (.glEnable GL/GL_POINT_SMOOTH)
+      (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
+      
+      (.glEnable GL/GL_LINE_SMOOTH)
+      (.glHint GL/GL_LINE_SMOOTH_HINT GL/GL_NICEST))))
+
+
 (defn draw-plot [gl plot bottom-axis left-axis]
   (when-let [drawfn (:drawfn plot)]
     (when-let [bottom-coordfn (get (:coords plot) (:coord bottom-axis))]
       (when-let [left-coordfn (get (:coords plot) (:coord left-axis))]
-        (drawfn gl (:data plot) bottom-axis bottom-coordfn left-axis left-coordfn (:attrs plot))))))
+        (gl-push-all gl
+          (let [attrs (:attrs plot)]
+            (prep-plot gl attrs)
+            (drawfn gl (:data plot) bottom-coordfn left-coordfn attrs)))))))
 
 
 (defn draw-plots [gl fignum]
