@@ -125,6 +125,11 @@
   (update-axes fignum merge {:bottom bottom-coordkey, :left left-coordkey}))
 
 
+; Doesn't work if existing limits are empty
+(defn pan [fignum coordkey amount]
+  (update-coordlims fignum coordkey #(map (fn [x] (- x amount)) %)))
+
+
 
 
 (defn get-valid-limits [limits]
