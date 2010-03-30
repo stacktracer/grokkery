@@ -11,6 +11,14 @@
   (reduce bit-or 0 flags))
 
 
+(defn min-of [coll]
+  (if (empty? coll) nil (apply min coll)))
+
+
+(defn max-of [coll]
+  (if (empty? coll) nil (apply max coll)))
+
+
 (defn add-listener [widget event-type f & args]
   (let [listener (proxy [Listener] []
                    (handleEvent [event] (apply f event args)))]

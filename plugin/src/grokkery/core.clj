@@ -1,4 +1,8 @@
-(ns grokkery.core)
+(ns grokkery.core
+  (:use
+    grokkery.util)
+  (:import
+    [javax.media.opengl GL]))
 
 
 (let [figs (ref {})]
@@ -17,12 +21,7 @@
   (defn add-plot [fignum data coords drawfn attrs]
     (dosync
       (let [plotnum (find-unused-plotnum (get-fig fignum))
-            plot {:fig fignum
-                  :plot plotnum
-                  :data data
-                  :coords coords
-                  :drawfn drawfn
-                  :attrs attrs}]
+            plot {:fig fignum, :plot plotnum, :data data, :coords coords, :drawfn drawfn, :attrs attrs}]
         (alter figs
           assoc-in [fignum :plots plotnum] plot)
         plot)))
@@ -59,12 +58,11 @@
         assoc-in [fignum :plots plotnum :attrs attrkey] attr)))
   
   
-  (defn set-axes [fignum xaxis-coordkey yaxis-coordkey]
-    (let [updates {:bottom xaxis-coordkey :left yaxis-coordkey}]
-      (dosync
-        (alter figs
-          update-in [fignum :axes] merge updates))))
-  
+  (defn update-axes [fignum f args]
+    (dosync
+      (alter figs
+        update-in [fignum :axes] #(apply f % args))))
+
   
   (defn update-coordlims [fignum coordkey f args]
     (dosync
@@ -72,36 +70,11 @@
         update-in [fignum :limits coordkey] #(apply f % args))))
   
   
-  (defn update-coordmin [fignum coordkey f args]
-    (dosync
-      (alter figs
-        update-in [fignum :limits coordkey :min] #(apply f % args))))
-  
-  
-  (defn update-coordmax [fignum coordkey f args]
-    (dosync
-      (alter figs
-        update-in [fignum :limits coordkey :max] #(apply f % args))))
-  
-  
   ; Accept lims for multiple coords (set-coordlims 0 :x [0 1] :y [-2 2])
-  (defn set-coordlims [fignum coordkey coordmin coordmax]
-    (let [coordlims {:min coordmin :max coordmax}]
-      (dosync
-        (alter figs
-          assoc-in [fignum :limits coordkey] coordlims))))
-  
-  
-  (defn set-coordmin [fignum coordkey coordmin]
+  (defn set-coordlims [fignum coordkey coordlims]
     (dosync
       (alter figs
-        assoc-in [fignum :limits coordkey :min] coordmin)))
-  
-  
-  (defn set-coordmax [fignum coordkey coordmax]
-    (dosync
-      (alter figs
-        assoc-in [fignum :limits coordkey :max] coordmax))))
+        assoc-in [fignum :limits coordkey] coordlims))))
 
 
 
@@ -114,19 +87,10 @@
   (get-in fig [:limits coordkey]))
 
 
-(defn get-coordmin [fig coordkey]
-  (:min (get-coordlims fig coordkey)))
+(defn get-coordkey [fig axiskey]
+  (get-in fig [:axes axiskey]))
 
 
-(defn get-coordmax [fig coordkey]
-  (:max (get-coordlims fig coordkey)))
-
-
-(defn get-axis [fig axiskey default-coordkey]
-  (let [coordkey (or (get-in fig [:axes axiskey]) default-coordkey)]
-    (assoc
-      (get-coordlims fig coordkey)
-      :coord coordkey)))
 
 
 (defn set-data [fignum plotnum data]
@@ -157,64 +121,63 @@
   (update-plot-field fignum plotnum :attrs f args))
 
 
+(defn set-axes [fignum bottom-coordkey left-coordkey]
+  (update-axes fignum merge {:bottom bottom-coordkey, :left left-coordkey}))
 
 
 
 
+(defn get-valid-limits [limits]
+  (if
+    (and
+      (not-empty limits)
+      (< (min-of limits) (max-of limits)))
+    limits
+    [0 1]))
 
 
-
-; Try destructuring args
-(defn get-limits [x-axis y-axis]
-  (let [xmin (:min x-axis)
-        xmax (:max x-axis)
-        ymin (:min y-axis)
-        ymax (:max y-axis)]
-    (merge
-      (if (some nil? [xmin xmax]) {:xmin 0 :xmax 1} {:xmin xmin :xmax xmax})
-      (if (some nil? [ymin ymax]) {:ymin 0 :ymax 1} {:ymin ymin :ymax ymax}))))
-
-
-(defn prep-plot [#^GL gl attrs]
-  (.glPointSize gl (or (:pointsize attrs) default-pointsize)
-  (gl-set-color gl (or (:color attrs) default-color)))
-  (let [xmin
-        xmax
-        ymin
-        ymax]
-  
-    (doto gl
-      (.glMatrixMode GL/GL_PROJECTION)
-      (.glLoadIdentity)
-      (.glOrtho xmin xmax ymin ymax -1 1)
-      (.glMatrixMode GL/GL_MODELVIEW)
-      (.glLoadIdentity)
-      
-      (.glEnable GL/GL_BLEND)
-      (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
-      
-      (.glEnable GL/GL_POINT_SMOOTH)
-      (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
-      
-      (.glEnable GL/GL_LINE_SMOOTH)
-      (.glHint GL/GL_LINE_SMOOTH_HINT GL/GL_NICEST))))
+(defn prep-plot [#^GL gl xlim ylim]
+  (doto gl
+    (.glMatrixMode GL/GL_PROJECTION)
+    (.glLoadIdentity)
+    (.glOrtho (min-of xlim) (max-of xlim) (min-of ylim) (max-of ylim) -1 1)
+    (.glMatrixMode GL/GL_MODELVIEW)
+    (.glLoadIdentity)
+    
+    (.glEnable GL/GL_BLEND)
+    (.glBlendFunc GL/GL_SRC_ALPHA GL/GL_ONE_MINUS_SRC_ALPHA)
+    
+    (.glEnable GL/GL_POINT_SMOOTH)
+    (.glHint GL/GL_POINT_SMOOTH_HINT GL/GL_NICEST)
+    
+    (.glEnable GL/GL_LINE_SMOOTH)
+    (.glHint GL/GL_LINE_SMOOTH_HINT GL/GL_NICEST)))
 
 
-(defn draw-plot [gl plot bottom-axis left-axis]
-  (when-let [drawfn (:drawfn plot)]
-    (when-let [bottom-coordfn (get (:coords plot) (:coord bottom-axis))]
-      (when-let [left-coordfn (get (:coords plot) (:coord left-axis))]
-        (gl-push-all gl
-          (let [attrs (:attrs plot)]
-            (prep-plot gl attrs)
-            (drawfn gl (:data plot) bottom-coordfn left-coordfn attrs)))))))
+(defn draw-plot [gl fig plotnum axis-coordkeys]
+  (let [plot (get-plot fig plotnum)
+        
+        x-coordkey (:bottom axis-coordkeys)
+        x-coordfn (get (:coords plot) x-coordkey)
+        x-limits (get-valid-limits (get-coordlims fig x-coordkey))
+        
+        y-coordkey (:left axis-coordkeys)
+        y-coordfn (get (:coords plot) y-coordkey)
+        y-limits (get-valid-limits (get-coordlims fig y-coordkey))
+        
+        drawfn (:drawfn plot)]
+    
+    (when (and x-coordfn y-coordfn drawfn)
+      (gl-push-all gl
+        (prep-plot gl x-limits y-limits)
+        (drawfn gl (:data plot) x-coordfn y-coordfn (:attrs plot))))))
 
 
 (defn draw-plots [gl fignum]
   (when-let [fig (get-fig fignum)]
-    (let [bottom-axis (get-axis fig :bottom :x)
-          left-axis (get-axis fig :left :y)]
+    (let [default-coordkeys {:bottom :x, :left :y}
+          axis-coordkeys (merge default-coordkeys (:axes fig))]
       (dorun
         (map
-          (fn [[_ plot]] (draw-plot gl plot bottom-axis left-axis))
-          (:plots fig))))))
+          #(draw-plot gl fig % axis-coordkeys)
+          (keys (:plots fig)))))))
