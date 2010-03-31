@@ -8,19 +8,22 @@
     [javax.media.opengl GL]))
 
 
-(def default-point-size 7)
-
-(def default-point-color [0.84 0.14 0.03 1])
-
 (def default-axes {:bottom :x, :left :y})
 
 (def default-limits {:x fallback-coordlims, :y fallback-coordlims})
 
 (def default-coordfns {:x first, :y second})
 
+(def default-point-size 7)
 
-(defn default-attrs [fignum]
-  {:point-color [1 0 0 1]})
+(def default-point-color (cycle [[0.84 0.14 0.03 1]
+                                 [0.13 0.35 0.84 1]
+                                 [0.09 0.64 0.13 1]
+                                 [0.84 0.68 0.00 1]]))
+
+
+(defn default-attrs [plotnum]
+  {:point-color (nth default-point-color plotnum)})
 
 
 (defn new-fig []
@@ -46,4 +49,6 @@
 
 
 (defn plot [fignum data]
-  (add-plot fignum data default-coordfns draw-basic (default-attrs fignum)))
+  (let [plotnum (add-plot fignum data default-coordfns draw-basic {})]
+    (set-attrs fignum plotnum (default-attrs plotnum))
+    plotnum))

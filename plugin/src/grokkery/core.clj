@@ -32,11 +32,10 @@
   
   (defn add-plot [fignum data coords drawfn attrs]
     (dosync
-      (let [plotnum (find-unused-plotnum (get-fig fignum))
-            plot {:fig fignum, :plot plotnum, :data data, :coords coords, :drawfn drawfn, :attrs attrs}]
+      (let [plotnum (find-unused-plotnum (get-fig fignum))]
         (alter figs
-          assoc-in [fignum :plots plotnum] plot)
-        plot)))
+          assoc-in [fignum :plots plotnum] {:fig fignum, :plot plotnum, :data data, :coords coords, :drawfn drawfn, :attrs attrs})
+        plotnum)))
   
   
   (defn remove-plot [fignum plotnum]
