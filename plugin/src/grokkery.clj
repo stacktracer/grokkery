@@ -14,7 +14,7 @@
 
 (def default-axes {:bottom :x, :left :y})
 
-(def default-limits {:x [0 10], :y [0 10]})
+(def default-limits {:x fallback-coordlims, :y fallback-coordlims})
 
 (def default-coordfns {:x first, :y second})
 

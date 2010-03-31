@@ -5,13 +5,16 @@
     [javax.media.opengl GL]))
 
 
+(def fallback-coordlims [0 10])
+
+
 (defn get-valid-limits [limits]
   (if
     (and
       (not-empty limits)
       (< (min-of limits) (max-of limits)))
     limits
-    [0 1]))
+    fallback-coordlims))
 
 
 (let [figs (ref {})]
