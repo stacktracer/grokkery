@@ -5,6 +5,15 @@
     [javax.media.opengl GL]))
 
 
+(defn get-valid-limits [limits]
+  (if
+    (and
+      (not-empty limits)
+      (< (min-of limits) (max-of limits)))
+    limits
+    [0 1]))
+
+
 (let [figs (ref {})]
 
   (defn get-fig [fignum]
@@ -64,10 +73,11 @@
         update-in [fignum :axes] #(apply f % args))))
 
   
+  ; Accept lims for multiple coords (update-coordlims 0 [:x f args] [:y f args])
   (defn update-coordlims [fignum coordkey f args]
     (dosync
       (alter figs
-        update-in [fignum :limits coordkey] #(apply f % args))))
+        update-in [fignum :limits coordkey] #(apply f (get-valid-limits %) args))))
   
   
   ; Accept lims for multiple coords (set-coordlims 0 :x [0 1] :y [-2 2])
@@ -84,7 +94,7 @@
 
 
 (defn get-coordlims [fig coordkey]
-  (get-in fig [:limits coordkey]))
+  (get-valid-limits (get-in fig [:limits coordkey])))
 
 
 (defn get-coordkey [fig axiskey]
@@ -125,20 +135,11 @@
   (update-axes fignum merge {:bottom bottom-coordkey, :left left-coordkey}))
 
 
-; Doesn't work if existing limits are empty
+; Accept pans for multiple coords (pan 0 :x 5 :y -2)
 (defn pan [fignum coordkey amount]
-  (update-coordlims fignum coordkey #(map (fn [x] (- x amount)) %)))
+  (update-coordlims fignum coordkey #(map (fn [x] (+ x amount)) %) []))
 
 
-
-
-(defn get-valid-limits [limits]
-  (if
-    (and
-      (not-empty limits)
-      (< (min-of limits) (max-of limits)))
-    limits
-    [0 1]))
 
 
 (defn prep-plot [#^GL gl xlim ylim]
