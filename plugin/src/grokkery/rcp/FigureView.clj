@@ -72,7 +72,7 @@
 
 
 (defn- #^GLCanvas make-gl-canvas [parent fignum]
-  (let [bounds (ref {:x 0 :y 0 :width 0 :height 0})
+  (let [bounds (ref {:x 0, :y 0, :width 0, :height 0})
         canvas (GLSimpleSwtCanvas.
                  parent
                  (into-array GLSimpleListener
@@ -90,7 +90,7 @@
                       
                       (reshape [#^GLContext context x y width height]
                         (dosync
-                          (ref-set bounds {:x x :y y :width width :height height})))
+                          (ref-set bounds {:x x, :y y, :width width, :height height})))
                       
                       (displayChanged [context modeChanged deviceChanged]))]))]
     
@@ -118,6 +118,11 @@
         (when (mouse-button-down? event)
           (dosync
             (pan fignum (merge-with - @grab-coords (get-mouse-coords event)))))))
+    
+    (add-listener canvas SWT/MouseWheel
+      (fn [event]
+        (dosync
+          (zoom fignum (- (.count event)) (get-mouse-coords event)))))
     
     canvas))
 

@@ -183,6 +183,20 @@
 
 
 
+(defn zoom-coord [anchor factor coord]
+  (+ anchor (* factor (- coord anchor))))
+
+
+(defn zoom [fignum steps anchor-coords]
+  (let [factor (Math/pow 1.111 steps)]
+    (dosync
+      (dorun
+        (map
+          (fn [[k v]] (update-coordlims fignum k #(map (partial zoom-coord v factor) %) []))
+          anchor-coords)))))
+
+
+
 
 (defn prep-plot [#^GL gl xlim ylim]
   (doto gl
