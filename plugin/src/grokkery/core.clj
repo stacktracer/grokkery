@@ -73,6 +73,18 @@
         update-in [fignum :axes] #(apply f % args))))
   
   
+  (defn replace-axes [fignum axes]
+    (dosync
+      (alter figs
+        assoc-in [fignum :axes] axes)))
+  
+  
+  (defn set-limits [fignum limits]
+    (dosync
+      (alter figs
+        assoc-in [fignum :limits] limits)))
+  
+  
   (defn update-coordlims [fignum coordkey f args]
     (dosync
       (alter figs
@@ -97,6 +109,28 @@
 
 (defn get-coordkey [fig axiskey]
   (get-in fig [:axes axiskey]))
+
+
+(defn get-coord [fig coordkey fraction]
+  (let [lims (get-coordlims fig coordkey)
+        min (min-of lims)
+        max (max-of lims)]
+    (+ min (* fraction (- max min)))))
+
+
+(defn- coord-entry [fig axiskey fraction]
+  (let [coordkey (get-coordkey fig axiskey)]
+    {coordkey (get-coord fig coordkey fraction)}))
+
+
+(defn get-coords [fig x-fraction y-fraction]
+  (dissoc
+    (merge
+      (coord-entry fig :top    x-fraction)
+      (coord-entry fig :bottom x-fraction)
+      (coord-entry fig :left   y-fraction)
+      (coord-entry fig :right  y-fraction))
+    nil))
 
 
 
@@ -134,14 +168,16 @@
 
 
 (defn pan
-  ([fignum coordkey amount]
-    (update-coordlims fignum coordkey #(map (fn [x] (+ x amount)) %) []))
-  ([fignum coordkey amount & more]
+  ([fignum coordkey-amounts]
     (dosync
-      (pan fignum coordkey amount)
-      (map
-        #(pan fignum (first %) (second %))
-        (partition 2 more)))))
+      (dorun
+        (map
+          (fn [[k v]] (update-coordlims fignum k #(map (partial + v) %) []))
+          coordkey-amounts))))
+  ([fignum coordkey amount]
+    (pan fignum {coordkey amount}))
+  ([fignum coordkey amount & more]
+    (pan fignum (apply hash-map coordkey amount more))))
 
 
 
@@ -185,9 +221,7 @@
 
 (defn draw-plots [gl fignum]
   (when-let [fig (get-fig fignum)]
-    (let [default-coordkeys {:bottom :x, :left :y}
-          axis-coordkeys (merge default-coordkeys (:axes fig))]
-      (dorun
-        (map
-          #(draw-plot gl fig % axis-coordkeys)
-          (keys (:plots fig)))))))
+    (dorun
+      (map
+        #(draw-plot gl fig % (:axes fig))
+        (keys (:plots fig))))))

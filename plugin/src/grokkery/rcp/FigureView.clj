@@ -7,7 +7,7 @@
     [org.eclipse.ui IWorkbenchPage IViewPart]
     [org.eclipse.swt.opengl GLCanvas]
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.graphics GC]
+    [org.eclipse.swt.graphics GC Cursor]
     [org.eclipse.swt.widgets Canvas Listener Event Composite]
     [glsimple GLSimpleListener]
     [glsimple.swt GLSimpleSwtCanvas GLSimpleSwtAnimator])
@@ -35,9 +35,9 @@
        fignum)))
 
 
-(defn get-fignum [#^IViewPart fig]
+(defn get-fignum [#^IViewPart figview]
   (Integer/parseInt
-    (.. fig (getViewSite) (getSecondaryId))))
+    (.. figview (getViewSite) (getSecondaryId))))
 
 
 
@@ -47,11 +47,11 @@
 
 
 (defn -init
-  ([fig site]
-    (.superInit fig site)
-    (.setPartName fig (str "Fig " (.getSecondaryId site))))
-  ([fig site memento]
-    (.init fig site)))
+  ([figview site]
+    (.superInit figview site)
+    (.setPartName figview (str "Fig " (.getSecondaryId site))))
+  ([figview site memento]
+    (.init figview site)))
 
 
 (defn get-xaxis-height [gc]
@@ -98,11 +98,35 @@
     canvas))
 
 
-(defn -createPartControl [fig #^Composite parent]
-  (let [fignum (get-fignum fig)
+(defn- #^GLCanvas make-content-canvas [parent fignum]
+  (let [grab-coords (ref {})
+        canvas (make-gl-canvas parent fignum)
+        get-mouse-coords (fn [event]
+                           (get-coords (get-fig fignum)
+                             (/ (.x event) (.. canvas (getSize) x))
+                             (- 1 (/ (.y event) (.. canvas (getSize) y)))))]
+    
+    (.setCursor canvas (Cursor. (.getDisplay canvas) SWT/CURSOR_SIZEALL))
+    
+    (add-listener canvas SWT/MouseDown
+      (fn [event]
+        (dosync
+          (ref-set grab-coords (get-mouse-coords event)))))
+    
+    (add-listener canvas SWT/MouseMove
+      (fn [event]
+        (when (mouse-button-down? event)
+          (dosync
+            (pan fignum (merge-with - @grab-coords (get-mouse-coords event)))))))
+    
+    canvas))
+
+
+(defn -createPartControl [figview #^Composite parent]
+  (let [fignum (get-fignum figview)
         x-axis (make-canvas parent fignum)
         y-axis (make-canvas parent fignum)
-        content-area (make-gl-canvas parent fignum)]
+        content-area (make-content-canvas parent fignum)]
     
     (.setLayout parent nil)
     (add-listener parent SWT/Resize
@@ -121,9 +145,9 @@
             (finally (.dispose gc))))))
     
     (dosync
-      (alter (.state fig) assoc :focusable content-area))))
+      (alter (.state figview) assoc :focusable content-area))))
 
 
-(defn -setFocus [fig]
-  (when-let [focusable (:focusable @(.state fig))]
+(defn -setFocus [figview]
+  (when-let [focusable (:focusable @(.state figview))]
     (.setFocus focusable)))

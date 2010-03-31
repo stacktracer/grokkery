@@ -1,4 +1,6 @@
 (ns grokkery
+  (:require
+    [grokkery.rcp.FigureView :as FigureView])
   (:use
     grokkery.util
     grokkery.core)
@@ -8,8 +10,23 @@
 
 (def default-point-size 7)
 
-
 (def default-point-color [0.84 0.14 0.03 1])
+
+(def default-axes {:bottom :x, :left :y})
+
+(def default-limits {:x [0 10], :y [0 10]})
+
+(def default-coordfns {:x first, :y second})
+
+
+(defn default-attrs [fignum]
+  {:point-color [1 0 0 1]})
+
+
+(defn new-fig []
+  (doto (FigureView/new-fig)
+    (replace-axes default-axes)
+    (set-limits default-limits)))
 
 
 (defn basic-point-drawfn [#^GL gl x-coordfn y-coordfn attrs]
@@ -29,4 +46,4 @@
 
 
 (defn plot [fignum data]
-  (add-plot fignum data {:x first, :y second} draw-basic {}))
+  (add-plot fignum data default-coordfns draw-basic (default-attrs fignum)))
