@@ -182,7 +182,6 @@
     (pan fignum (apply hash-map coordkey amount more))))
 
 
-
 (defn zoom-coord [anchor factor coord]
   (+ anchor (* factor (- coord anchor))))
 
