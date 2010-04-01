@@ -71,8 +71,32 @@
     canvas))
 
 
+
+(def fpsinfo-reset-interval 10000)
+
+
+(defn- update-fpsinfo [fpsinfo]
+  (let [now (System/currentTimeMillis)]
+    (if (or
+          (not-every? fpsinfo [:count :start])
+          (> now (+ (:start fpsinfo) fpsinfo-reset-interval)))
+      {:count 0, :start now}
+      (update-in fpsinfo [:count] inc))))
+
+
+(defn- handle-fpsinfo-change [fignum ref old-fpsinfo new-fpsinfo]
+  (when (and
+          (every? old-fpsinfo [:count :start])
+          (not= (:start old-fpsinfo) (:start new-fpsinfo)))
+    (println
+      (format "Fig %d refresh rate: %.1f fps"
+        fignum
+        (float (/ (* 1000 (inc (:count old-fpsinfo))) (- (:start new-fpsinfo) (:start old-fpsinfo))))))))
+
+
 (defn- #^GLCanvas make-gl-canvas [parent fignum]
   (let [bounds (ref {:x 0, :y 0, :width 0, :height 0})
+        fpsinfo (ref {})
         canvas (GLSimpleSwtCanvas.
                  parent
                  (into-array GLSimpleListener
@@ -84,9 +108,10 @@
                           (.glClearColor 1 1 1 1)))
                       
                       (display [#^GLContext context]
-                        (let [gl (.getGL context)]
-                          (.glClear gl GL/GL_COLOR_BUFFER_BIT)
-                          (draw-plots gl fignum)))
+                        (doto (.getGL context)
+                          (.glClear GL/GL_COLOR_BUFFER_BIT)
+                          (draw-plots fignum))
+                        (dosync (alter fpsinfo update-fpsinfo)))
                       
                       (reshape [#^GLContext context x y width height]
                         (dosync
@@ -94,6 +119,7 @@
                       
                       (displayChanged [context modeChanged deviceChanged]))]))]
     
+    (add-watch fpsinfo fignum handle-fpsinfo-change)
     (.start (GLSimpleSwtAnimator. 30 canvas))
     canvas))
 
