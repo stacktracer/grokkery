@@ -60,20 +60,21 @@
   [(* (first va) (first vb)) (* (second va) (second vb))])
 
 
+
+(def n1 113)
+(def n2 47)
+(def values (take (* n1 n2) (repeatedly rand)))
+(def origin [0 0])
+(def v1 [0.9 -0.1])
+(def v2 [0.4 2.3])
+
 (defn draw-surf [#^GL gl data x-coordfn y-coordfn attrs]
 
   (.glShadeModel gl GL/GL_FLAT)
   (.glEnable gl GL/GL_CULL_FACE)
 
 
-  (let [n1 113
-        n2 47
-        num-values (* n1 n2)
-        values (take num-values (repeatedly rand))
-        origin [0 0]
-        v1 [0.9 -0.1]
-        v2 [0.4 2.3]
-        words-per-vert 2
+  (let [words-per-vert 2
         words-per-color 4
         num-verts (* 2 (+ n2 1) n1)
         verts (BufferUtil/newFloatBuffer (* words-per-vert num-verts))
