@@ -24,8 +24,15 @@
 
 
 
-(defn cell-colorfn [cell-value]
-  [cell-value 0 (- 1 cell-value) 1])
+(defn cell-colorfn [cell-value #^floats rgba-array]
+  (let [one (float 1)
+        zero (float 0)
+        v (float cell-value)]
+    (doto rgba-array
+      (aset 0 v)
+      (aset 1 zero)
+      (aset 2 (- one v))
+      (aset 3 one))))
 
 
 (defn interpose-every-n [sep coll n]
@@ -77,16 +84,22 @@
 
   (let [words-per-vert 2
         words-per-color 4
+        color-temp (float-array words-per-color)
         num-verts (* 2 (+ n2 1) n1)
         verts (BufferUtil/newFloatBuffer (* words-per-vert num-verts))
         colors (BufferUtil/newFloatBuffer (* words-per-color num-verts))]
 
-
-    (let [vert-colors (duplicate
-                        (map cell-colorfn
-                          (interpose-every-n 0 values n2)))]
-
-      (doseq [x (apply concat vert-colors)] (.put colors (float x))))
+    (doseq [value (interpose-every-n 0 values n2)]
+      (cell-colorfn value color-temp)
+      (doto colors
+        (.put (aget rgba 0))
+        (.put (aget rgba 1))
+        (.put (aget rgba 2))
+        (.put (aget rgba 3))
+        (.put (aget rgba 0))
+        (.put (aget rgba 1))
+        (.put (aget rgba 2))
+        (.put (aget rgba 3))))
 
     (.flip colors)
 
