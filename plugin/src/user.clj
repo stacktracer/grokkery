@@ -96,9 +96,8 @@
                       (for [i2 (range (inc n2))]
                         (+vv col-origin (*sv i2 v2)))))
 
-          vert-points (reduce
-                        #(concat %1 (reduce interleave %2))
-                        []
+          vert-points (mapcat
+                        #(apply interleave %)
                         (partition 2 (butlast (rest (duplicate corners)))))]
 
       (doseq [x (apply concat vert-points)] (.put verts (float x))))
