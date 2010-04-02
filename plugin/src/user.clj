@@ -102,16 +102,22 @@
     (.flip colors)
 
 
-    (let [corners (for [i1 (range (inc n1))]
-                    (let [col-origin (+vv origin (*sv i1 v1))]
-                      (for [i2 (range (inc n2))]
-                        (+vv col-origin (*sv i2 v2)))))
+    (let [ni1 (int (dec n1)), ni2 (int n2)
+          x-orig (float (origin 0)), y-orig (float (origin 1))
+          x-v1 (float (v1 0)), y-v1 (float (v1 1))
+          x-v2 (float (v2 0)), y-v2 (float (v2 1))]
 
-          vert-points (mapcat
-                        #(apply interleave %)
-                        (partition 2 (butlast (rest (duplicate corners)))))]
-
-      (doseq [x (apply concat vert-points)] (.put verts (float x))))
+      (loop [i1 (int 0)]
+        (let [xa-col (+ x-orig (* i1 x-v1)), ya-col (+ y-orig (* i1 y-v1))
+              xb-col (+ x-orig (* (inc i1) x-v1)), yb-col (+ y-orig (* (inc i1) y-v1))]
+          (loop [i2 (int 0)]
+            (let [xa (+ xa-col (* i2 x-v2)), ya (+ ya-col (* i2 y-v2))
+                  xb (+ xb-col (* i2 x-v2)), yb (+ yb-col (* i2 y-v2))]
+              (doto verts
+                (.put xa) (.put ya)
+                (.put xb) (.put yb)))
+            (when (< i2 ni2) (recur (inc i2)))))
+        (when (< i1 ni1) (recur (inc i1)))))
 
     (.flip verts)
 
