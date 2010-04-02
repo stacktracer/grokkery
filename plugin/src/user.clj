@@ -91,15 +91,13 @@
 
     (doseq [value (interpose-every-n 0 values n2)]
       (cell-colorfn value color-temp)
+      (let [r (aget color-temp 0)
+            g (aget color-temp 1)
+            b (aget color-temp 2)
+            a (aget color-temp 3)]
       (doto colors
-        (.put (aget rgba 0))
-        (.put (aget rgba 1))
-        (.put (aget rgba 2))
-        (.put (aget rgba 3))
-        (.put (aget rgba 0))
-        (.put (aget rgba 1))
-        (.put (aget rgba 2))
-        (.put (aget rgba 3))))
+        (.put r) (.put g) (.put b) (.put a)
+        (.put r) (.put g) (.put b) (.put a))))
 
     (.flip colors)
 
