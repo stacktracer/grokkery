@@ -3,6 +3,7 @@
     [grokkery.core]
     [grokkery.util]
     [grokkery]
+    [clojure.contrib.seq-utils]
     [clojure.contrib.generic.math-functions])
   (:import
     [javax.media.opengl GL]
@@ -28,7 +29,7 @@
 
 
 (defn interpose-every-n [sep coll n]
-  (reduce #(concat %1 [sep] %2) [] (partition n coll)))
+  (mapcat cons (repeat sep) (partition-all n coll)))
 
 
 (defn duplicate [coll]
