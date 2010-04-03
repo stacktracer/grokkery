@@ -33,15 +33,21 @@
         color-temp (float-array words-per-color)
         buf (BufferUtil/newFloatBuffer (* words-per-color num-verts))]
 
-    (doseq [value (interpose-every-n 0 values nv)]
-      (value-to-color value color-temp)
-      (let [r (aget color-temp 0)
-            g (aget color-temp 1)
-            b (aget color-temp 2)
-            a (aget color-temp 3)]
-      (doto buf
-        (.put r) (.put g) (.put b) (.put a)
-        (.put r) (.put g) (.put b) (.put a))))
+    (doseq [value (interpose-every-n :retrace values nv)]
+      (if (= :retrace value)
+        (let [zero (float 0)]
+          (doto buf
+            (.put zero) (.put zero) (.put zero) (.put zero)
+            (.put zero) (.put zero) (.put zero) (.put zero)))
+        (do
+          (value-to-color value color-temp)
+          (let [r (aget color-temp 0)
+                g (aget color-temp 1)
+                b (aget color-temp 2)
+                a (aget color-temp 3)]
+            (doto buf
+              (.put r) (.put g) (.put b) (.put a)
+              (.put r) (.put g) (.put b) (.put a))))))
 
     (.flip buf)
     buf))
@@ -98,7 +104,6 @@
 
     (doto gl
       (.glShadeModel GL/GL_FLAT)
-      (.glEnable GL/GL_CULL_FACE)
 
       (.glEnableClientState GL/GL_VERTEX_ARRAY)
       (.glEnableClientState GL/GL_COLOR_ARRAY)
