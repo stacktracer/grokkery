@@ -79,8 +79,8 @@
 
 
 
-(def nu 113)
-(def nv 47)
+(def nu 350)
+(def nv 150)
 (def values (take (* nu nv) (repeatedly rand)))
 (def origin [0 0])
 (def u [0.9 -0.1])
