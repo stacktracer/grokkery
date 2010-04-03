@@ -96,19 +96,20 @@
         verts (make-vertex-buffer origin u v nu nv)
         colors (make-color-buffer values value-to-color nu nv)]
 
-    (.glShadeModel gl GL/GL_FLAT)
-    (.glEnable gl GL/GL_CULL_FACE)
+    (doto gl
+      (.glShadeModel GL/GL_FLAT)
+      (.glEnable GL/GL_CULL_FACE)
 
-    (.glEnableClientState gl GL/GL_VERTEX_ARRAY)
-    (.glEnableClientState gl GL/GL_COLOR_ARRAY)
-    (.glBindBuffer gl GL/GL_ARRAY_BUFFER 0)
+      (.glEnableClientState GL/GL_VERTEX_ARRAY)
+      (.glEnableClientState GL/GL_COLOR_ARRAY)
+      (.glBindBuffer GL/GL_ARRAY_BUFFER 0)
 
-    (.glVertexPointer gl words-per-vert GL/GL_FLOAT 0 verts)
-    (.glColorPointer gl words-per-color GL/GL_FLOAT 0 colors)
-    (.glDrawArrays gl GL/GL_QUAD_STRIP 0 num-verts)
+      (.glVertexPointer words-per-vert GL/GL_FLOAT 0 verts)
+      (.glColorPointer words-per-color GL/GL_FLOAT 0 colors)
+      (.glDrawArrays GL/GL_QUAD_STRIP 0 num-verts)
 
-    (.glDisableClientState gl GL/GL_VERTEX_ARRAY)
-    (.glDisableClientState gl GL/GL_COLOR_ARRAY)))
+      (.glDisableClientState GL/GL_VERTEX_ARRAY)
+      (.glDisableClientState GL/GL_COLOR_ARRAY))))
 
 
 
