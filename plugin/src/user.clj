@@ -37,9 +37,8 @@
   (mapcat cons (repeat sep) (partition-all n coll)))
 
 
-(defn #^FloatBuffer make-color-buffer [values value-to-color nu nv]
-  (let [values2 (double-array values)
-        num-verts (get-num-verts nu nv)
+(defn #^FloatBuffer make-color-buffer [#^doubles values value-to-color nu nv]
+  (let [num-verts (get-num-verts nu nv)
         color-temp (float-array words-per-color)
         zero (float 0)
         buf (BufferUtil/newFloatBuffer (* words-per-color num-verts))]
@@ -50,9 +49,9 @@
           (.put zero) (.put zero) (.put zero) (.put zero)
           (.put zero) (.put zero) (.put zero) (.put zero))
 
-        (let [offset (* i nj)]
-          (loop [j (int 0)]
-            (value-to-color (aget values2 (+ offset j)) color-temp)
+        (let [j0 (* i nj), j1 (+ j0 nj)]
+          (loop [j j0]
+            (value-to-color (aget values j) color-temp)
             (let [r (aget color-temp 0)
                   g (aget color-temp 1)
                   b (aget color-temp 2)
@@ -60,7 +59,7 @@
               (doto buf
                 (.put r) (.put g) (.put b) (.put a)
                 (.put r) (.put g) (.put b) (.put a)))
-            (when (< j nj) (recur (inc j)))))
+            (when (< j j1) (recur (inc j)))))
         (when (< i ni) (recur (inc i)))))
 
     (.flip buf)
@@ -95,7 +94,7 @@
 
 (def nu 350)
 (def nv 150)
-(def values (take (* nu nv) (repeatedly rand)))
+(def values (double-array (take (* nu nv) (repeatedly rand))))
 (def origin [0 0])
 (def u [0.9 -0.1])
 (def v [0.4 2.3])
