@@ -1,7 +1,7 @@
 (ns grokkery.util
   (:import
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.widgets Listener Display]
+    [org.eclipse.swt.widgets Listener Display Event]
     [org.eclipse.swt.events VerifyListener VerifyEvent]
     [org.eclipse.ui PlatformUI]
     [javax.media.opengl GL]))
@@ -46,7 +46,7 @@
     (getActivePage)))
 
 
-(defn mouse-button-down? [event]
+(defn mouse-button-down? [#^Event event]
 	(not (zero? (bit-and (.stateMask event) SWT/BUTTON_MASK))))
 
 

@@ -215,7 +215,7 @@
     (.glHint GL/GL_LINE_SMOOTH_HINT GL/GL_NICEST)))
 
 
-(defn draw-plot [gl fig plotnum axis-coordkeys]
+(defn draw-plot [#^GL gl fig plotnum axis-coordkeys]
   (let [plot (get-plot fig plotnum)
         
         x-coordkey (:bottom axis-coordkeys)

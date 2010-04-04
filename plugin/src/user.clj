@@ -7,6 +7,7 @@
     [clojure.contrib.generic.math-functions])
   (:import
     [javax.media.opengl GL]
+    [java.nio FloatBuffer]
     [com.sun.opengl.util BufferUtil]))
 
 
@@ -24,8 +25,8 @@
 
 
 
-(def words-per-color 4)
-(def words-per-vert 2)
+(def words-per-color (int 4))
+(def words-per-vert (int 2))
 
 
 (defn get-num-verts [nu nv]
@@ -36,7 +37,7 @@
   (mapcat cons (repeat sep) (partition-all n coll)))
 
 
-(defn make-color-buffer [values value-to-color nu nv]
+(defn #^FloatBuffer make-color-buffer [values value-to-color nu nv]
   (let [values2 (double-array values)
         num-verts (get-num-verts nu nv)
         color-temp (float-array words-per-color)
@@ -66,7 +67,7 @@
     buf))
 
 
-(defn make-vertex-buffer [origin u v nu nv]
+(defn #^FloatBuffer make-vertex-buffer [origin u v nu nv]
   (let [num-verts (get-num-verts nu nv)
         buf (BufferUtil/newFloatBuffer (* words-per-vert num-verts))]
 
@@ -122,8 +123,8 @@
       (.glEnableClientState GL/GL_COLOR_ARRAY)
       (.glBindBuffer GL/GL_ARRAY_BUFFER 0)
 
-      (.glVertexPointer words-per-vert GL/GL_FLOAT 0 verts)
-      (.glColorPointer words-per-color GL/GL_FLOAT 0 colors)
+      (.glVertexPointer (int words-per-vert) (int GL/GL_FLOAT) (int 0) verts)
+      (.glColorPointer (int words-per-color) (int GL/GL_FLOAT) (int 0) colors)
       (.glDrawArrays GL/GL_QUAD_STRIP 0 num-verts)
 
       (.glDisableClientState GL/GL_VERTEX_ARRAY)
