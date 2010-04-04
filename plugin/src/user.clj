@@ -29,25 +29,30 @@
 
 
 (defn make-color-buffer [values value-to-color nu nv]
-  (let [num-verts (get-num-verts nu nv)
+  (let [values2 (double-array values)
+        num-verts (get-num-verts nu nv)
         color-temp (float-array words-per-color)
+        zero (float 0)
         buf (BufferUtil/newFloatBuffer (* words-per-color num-verts))]
 
-    (doseq [value (interpose-every-n :retrace values nv)]
-      (if (= :retrace value)
-        (let [zero (float 0)]
-          (doto buf
-            (.put zero) (.put zero) (.put zero) (.put zero)
-            (.put zero) (.put zero) (.put zero) (.put zero)))
-        (do
-          (value-to-color value color-temp)
-          (let [r (aget color-temp 0)
-                g (aget color-temp 1)
-                b (aget color-temp 2)
-                a (aget color-temp 3)]
-            (doto buf
-              (.put r) (.put g) (.put b) (.put a)
-              (.put r) (.put g) (.put b) (.put a))))))
+    (let [ni (int (dec nu)), nj (int (dec nv))]
+      (loop [i (int 0)]
+        (doto buf
+          (.put zero) (.put zero) (.put zero) (.put zero)
+          (.put zero) (.put zero) (.put zero) (.put zero))
+
+        (let [offset (* i nj)]
+          (loop [j (int 0)]
+            (value-to-color (aget values2 (+ offset j)) color-temp)
+            (let [r (aget color-temp 0)
+                  g (aget color-temp 1)
+                  b (aget color-temp 2)
+                  a (aget color-temp 3)]
+              (doto buf
+                (.put r) (.put g) (.put b) (.put a)
+                (.put r) (.put g) (.put b) (.put a)))
+            (when (< j nj) (recur (inc j)))))
+        (when (< i ni) (recur (inc i)))))
 
     (.flip buf)
     buf))
