@@ -25,8 +25,8 @@
 
 
 
-(def words-per-color (int 4))
-(def words-per-vert (int 2))
+(def words-per-color 4)
+(def words-per-vert 2)
 
 
 (defn get-num-verts [nu nv]
