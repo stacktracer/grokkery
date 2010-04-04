@@ -15,6 +15,14 @@
 
 
 
+(defmacro time2 [msg expr]
+  `(let [start# (. System (nanoTime))
+         ret# ~expr]
+     (prn (str ~msg " -- elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " ms"))
+     ret#))
+
+
+
 
 (def words-per-color 4)
 (def words-per-vert 2)
@@ -104,8 +112,8 @@
 
 (defn draw-surf [#^GL gl data x-coordfn y-coordfn attrs]
   (let [num-verts (get-num-verts nu nv)
-        verts (make-vertex-buffer origin u v nu nv)
-        colors (make-color-buffer values value-to-color nu nv)]
+        verts (time2 "make-vertex-buffer" (make-vertex-buffer origin u v nu nv))
+        colors (time2 "make-color-buffer " (make-color-buffer values value-to-color nu nv))]
 
     (doto gl
       (.glShadeModel GL/GL_FLAT)
