@@ -127,23 +127,32 @@
 (defn- #^GLCanvas make-content-canvas [parent fignum]
   (let [grab-coords (ref {})
         canvas (make-gl-canvas parent fignum)
+        
         get-mouse-coords (fn [event]
                            (get-coords (get-fig fignum)
                              (/ (.x event) (.. canvas (getSize) x))
-                             (- 1 (/ (.y event) (.. canvas (getSize) y)))))]
+                             (- 1 (/ (.y event) (.. canvas (getSize) y)))))
+        
+        ; Up/down events are sometimes interleaved with move events out of order.
+        ; To deal with this, we track the button state manually: @grab-coords is
+        ; nil iff no buttons are down. As a result, we treat press and drag events
+        ; the same way, and release and move events the same way.
+        
+        on-press-or-drag (fn [event]
+                           (dosync
+                             (if (nil? @grab-coords)
+                               (ref-set grab-coords (get-mouse-coords event))
+                               (pan fignum (merge-with - @grab-coords (get-mouse-coords event))))))
+        
+        on-release-or-move (fn [event]
+                             (dosync
+                               (ref-set grab-coords nil)))]
     
     (.setCursor canvas (Cursor. (.getDisplay canvas) SWT/CURSOR_SIZEALL))
     
-    (add-listener canvas SWT/MouseDown
-      (fn [event]
-        (dosync
-          (ref-set grab-coords (get-mouse-coords event)))))
-    
-    (add-listener canvas SWT/MouseMove
-      (fn [event]
-        (when (mouse-button-down? event)
-          (dosync
-            (pan fignum (merge-with - @grab-coords (get-mouse-coords event)))))))
+    (add-listener canvas SWT/MouseUp on-release-or-move)
+    (add-listener canvas SWT/MouseDown on-press-or-drag)
+    (add-listener canvas SWT/MouseMove #(if (mouse-button-down? %) (on-press-or-drag %) (on-release-or-move %)))
     
     (add-listener canvas SWT/MouseWheel
       (fn [event]
