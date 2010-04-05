@@ -103,11 +103,10 @@
   (let [one (float 1)
         zero (float 0)
         v (float cell-value)]
-    (doto rgba-array
-      (aset 0 v)
-      (aset 1 zero)
-      (aset 2 (- one v))
-      (aset 3 one))))
+    (aset rgba-array 0 v)
+    (aset rgba-array 1 zero)
+    (aset rgba-array 2 (- one v))
+    (aset rgba-array 3 one)))
 
 
 (defn draw-surf [#^GL gl data x-coordfn y-coordfn attrs]
