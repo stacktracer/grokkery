@@ -71,11 +71,12 @@
   (let [num-verts (get-num-verts nu nv)
         buf (BufferUtil/newFloatBuffer (* words-per-vert num-verts))]
 
-    (let [ni (int (dec nu)), nj (int nv)]
+    (let [i-step (float (/ 1 nu)), j-step (float (/ 1 nv))
+          ni (int (dec nu)), nj (int nv)]
       (loop [i (int 0)]
         (loop [j (int 0)]
-          (let [pa [(/ i nu) (/ j nv)], xa (float (x-coordfn pa)), ya (float (y-coordfn pa)),
-                pb [(/ (inc i) nu) (/ j nv)], xb (float (x-coordfn pb)), yb (float (y-coordfn pb))]
+          (let [pa [(* i-step i) (* j-step j)],       xa (float (x-coordfn pa)), ya (float (y-coordfn pa)),
+                pb [(* i-step (inc i)) (* j-step j)], xb (float (x-coordfn pb)), yb (float (y-coordfn pb))]
             (doto buf
               (.put xa) (.put ya)
               (.put xb) (.put yb)))
@@ -106,8 +107,8 @@
 
 
 
-(def nu 35)
-(def nv 15)
+(def nu 100)
+(def nv 100)
 (def values (double-array (take (* nu nv) (repeatedly rand))))
 (def origin [0 0])
 (def u [0.9 -0.1])
