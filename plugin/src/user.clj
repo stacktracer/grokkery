@@ -34,10 +34,6 @@
   (* 2 (+ nv 1) nu))
 
 
-(defn interpose-every-n [sep coll n]
-  (mapcat cons (repeat sep) (partition-all n coll)))
-
-
 (defn #^FloatBuffer make-color-buffer [#^doubles values nu nv #^objects colors min-value max-value]
   (let [num-verts (get-num-verts nu nv)
         float0 (float 0)
