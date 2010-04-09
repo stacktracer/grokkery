@@ -132,6 +132,24 @@
   [fraction fraction fraction 1])
 
 
+(defn hot [fraction]
+  [(* 3 fraction)
+   (* 3 (- fraction (/ 1 3)))
+   (* 3 (- fraction (/ 2 3)))
+   1])
+
+
+(defn hot2 [fraction]
+  (hot (* fraction fraction)))
+
+
+(defn hot3 [fraction]
+  (hot (* fraction (* fraction fraction))))
+
+
+(defn hot4 [fraction]
+  (hot (* (* fraction fraction) (* fraction fraction))))
+
 
 (def nu 350)
 (def nv 150)
@@ -140,15 +158,17 @@
 (def u [0.9 -0.1])
 (def v [0.4 2.3])
 
-(def gray64 (make-colors gray 64))
+(def gray-64 (make-colors gray 64))
 
-(def gray64+red+green (make-colors gray 64 [1 0 0 1] [0 1 0 1]))
+(def gray-64+red+green (make-colors gray 64 [1 0 0 1] [0 1 0 1]))
+
+(def hot4-64+blue+green (make-colors hot4 64 [0 0.4 1 1] [0 1 0.4 1]))
 
 
 (defn draw-surf [#^GL gl data x-coordfn y-coordfn attrs]
   (let [num-verts (get-num-verts nu nv)
         verts (time2 "make-vertex-buffer" (make-vertex-buffer x-coordfn y-coordfn nu nv))
-        colors (time2 "make-color-buffer " (make-color-buffer values nu nv gray64+red+green 0.01 0.99))]
+        colors (time2 "make-color-buffer " (make-color-buffer values nu nv hot4-64+blue+green 0.01 0.99))]
 
     (doto gl
       (.glShadeModel GL/GL_FLAT)
