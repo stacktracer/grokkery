@@ -19,7 +19,8 @@
 (defmacro time2 [msg expr]
   `(let [start# (. System (nanoTime))
          ret# ~expr]
-     (prn (str ~msg " -- elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " ms"))
+     (if false
+       (prn (str ~msg " -- elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " ms")))
      ret#))
 
 
