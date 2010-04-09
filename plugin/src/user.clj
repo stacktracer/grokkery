@@ -77,11 +77,11 @@
           gx-step (float (/ 1 nu))
           gy-step (float (/ 1 nv))]
       (loop [i (int 0)]
-        (let [column-x #^floats (aget grid-x i)
+        (let [gx (* i gx-step)
+              column-x #^floats (aget grid-x i)
               column-y #^floats (aget grid-y i)]
           (loop [j (int 0)]
-            (let [gx (* i gx-step)
-                  gy (* j gy-step)
+            (let [gy (* j gy-step)
                   x (float (x-coordfn gx gy))
                   y (float (y-coordfn gx gy))]
               (aset column-x j x)
