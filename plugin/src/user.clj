@@ -85,25 +85,6 @@
         (when (< j nj) (recur (inc j))))
       (when (< i ni) (recur (inc i)))))
 
-
-#_
-    (let [ni (int (dec nu)), nj (int nv)
-          ox (float (origin 0)), oy (float (origin 1))
-          ux (float (u 0)), uy (float (u 1))
-          vx (float (v 0)), vy (float (v 1))]
-
-      (loop [i (int 0)]
-        (let [xa0 (+ ox (* i ux)), ya0 (+ oy (* i uy))
-              xb0 (+ ox (* (inc i) ux)), yb0 (+ oy (* (inc i) uy))]
-          (loop [j (int 0)]
-            (let [xa (+ xa0 (* j vx)), ya (+ ya0 (* j vy))
-                  xb (+ xb0 (* j vx)), yb (+ yb0 (* j vy))]
-              (doto buf
-                (.put xa) (.put ya)
-                (.put xb) (.put yb)))
-            (when (< j nj) (recur (inc j)))))
-        (when (< i ni) (recur (inc i)))))
-
     (.flip buf)
     buf))
 
