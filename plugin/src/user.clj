@@ -54,8 +54,8 @@
         (let [j0 (* i nj), j1 (+ j0 nj)]
           (loop [j j0]
             (let [value (aget values j)
-                  inrange-idx (int (* offset-to-index (- value valmin)))
-                  idx (Math/max int0 (Math/min idxmax (inc inrange-idx)))
+                  inrange-idx (* offset-to-index (- value valmin))
+                  idx (Math/max int0 (Math/min idxmax (int (inc inrange-idx))))
                   #^floats c (aget colors idx)
                   r (aget c 0), g (aget c 1), b (aget c 2), a (aget c 3)]
               (doto buf
@@ -142,11 +142,13 @@
 
 (def gray64 (make-colors gray 64))
 
+(def gray64+red+green (make-colors gray 64 [1 0 0 1] [0 1 0 1]))
+
 
 (defn draw-surf [#^GL gl data x-coordfn y-coordfn attrs]
   (let [num-verts (get-num-verts nu nv)
         verts (time2 "make-vertex-buffer" (make-vertex-buffer x-coordfn y-coordfn nu nv))
-        colors (time2 "make-color-buffer " (make-color-buffer values nu nv gray64 0 1))]
+        colors (time2 "make-color-buffer " (make-color-buffer values nu nv gray64+red+green 0.01 0.99))]
 
     (doto gl
       (.glShadeModel GL/GL_FLAT)
