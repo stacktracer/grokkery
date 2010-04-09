@@ -19,7 +19,7 @@
 (defmacro time2 [msg expr]
   `(let [start# (. System (nanoTime))
          ret# ~expr]
-     (if false
+     (if true
        (prn (str ~msg " -- elapsed time: " (/ (double (- (. System (nanoTime)) start#)) 1000000.0) " ms")))
      ret#))
 
@@ -108,8 +108,8 @@
 
 
 
-(def nu 100)
-(def nv 100)
+(def nu 350)
+(def nv 150)
 (def values (double-array (take (* nu nv) (repeatedly rand))))
 (def origin [0 0])
 (def u [0.9 -0.1])
