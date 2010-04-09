@@ -71,12 +71,13 @@
   (let [num-verts (get-num-verts nu nv)
         buf (BufferUtil/newFloatBuffer (* words-per-vert num-verts))]
 
-    (let [i-step (float (/ 1 nu)), j-step (float (/ 1 nv))
+    (let [gx-step (float (/ 1 nu)), gy-step (float (/ 1 nv))
           ni (int (dec nu)), nj (int nv)]
       (loop [i (int 0)]
         (loop [j (int 0)]
-          (let [pa [(* i-step i) (* j-step j)],       xa (float (x-coordfn pa)), ya (float (y-coordfn pa)),
-                pb [(* i-step (inc i)) (* j-step j)], xb (float (x-coordfn pb)), yb (float (y-coordfn pb))]
+          (let [gxa (* i gx-step), gxb (+ gxa gx-step), gy (* j gy-step),
+                xa (float (x-coordfn gxa gy)), ya (float (y-coordfn gxa gy)),
+                xb (float (x-coordfn gxb gy)), yb (float (y-coordfn gxb gy))]
             (doto buf
               (.put xa) (.put ya)
               (.put xb) (.put yb)))
@@ -147,4 +148,4 @@
 
 
 (defn surf [fignum]
-  (add-plot fignum [] default-coordfns draw-surf {}))
+  (add-plot fignum [] {:x (fn [gx gy] gx), :y (fn [gx gy] gy)} draw-surf {}))
