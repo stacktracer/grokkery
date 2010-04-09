@@ -67,10 +67,23 @@
     buf))
 
 
-(defn #^FloatBuffer make-vertex-buffer [origin u v nu nv]
+(defn #^FloatBuffer make-vertex-buffer [x-coordfn y-coordfn nu nv]
   (let [num-verts (get-num-verts nu nv)
         buf (BufferUtil/newFloatBuffer (* words-per-vert num-verts))]
 
+    (let [ni (int (dec nu)), nj (int nv)]
+      (loop [i (int 0)]
+        (loop [j (int 0)]
+          (let [pa [(/ i nu) (/ j nv)], xa (float (x-coordfn pa)), ya (float (y-coordfn pa)),
+                pb [(/ (inc i) nu) (/ j nv)], xb (float (x-coordfn pb)), yb (float (y-coordfn pb))]
+            (doto buf
+              (.put xa) (.put ya)
+              (.put xb) (.put yb)))
+        (when (< j nj) (recur (inc j))))
+      (when (< i ni) (recur (inc i)))))
+
+
+#_
     (let [ni (int (dec nu)), nj (int nv)
           ox (float (origin 0)), oy (float (origin 1))
           ux (float (u 0)), uy (float (u 1))
@@ -93,8 +106,8 @@
 
 
 
-(def nu 350)
-(def nv 150)
+(def nu 35)
+(def nv 15)
 (def values (double-array (take (* nu nv) (repeatedly rand))))
 (def origin [0 0])
 (def u [0.9 -0.1])
@@ -112,7 +125,7 @@
 
 (defn draw-surf [#^GL gl data x-coordfn y-coordfn attrs]
   (let [num-verts (get-num-verts nu nv)
-        verts (time2 "make-vertex-buffer" (make-vertex-buffer origin u v nu nv))
+        verts (time2 "make-vertex-buffer" (make-vertex-buffer x-coordfn y-coordfn nu nv))
         colors (time2 "make-color-buffer " (make-color-buffer values value-to-color nu nv))]
 
     (doto gl
