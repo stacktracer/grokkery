@@ -38,25 +38,30 @@
   (mapcat cons (repeat sep) (partition-all n coll)))
 
 
-(defn #^FloatBuffer make-color-buffer [#^doubles values value-to-color nu nv]
+(defn #^FloatBuffer make-color-buffer [#^doubles values nu nv #^objects colors min-value max-value]
   (let [num-verts (get-num-verts nu nv)
-        color-temp (float-array words-per-color)
-        zero (float 0)
+        float0 (float 0)
+        int0 (int 0)
+        valmin (double min-value)
+        valmax (double max-value)
+        num-inrange-colors (- (alength colors) 2)
+        offset-to-index (double (/ num-inrange-colors (- max-value min-value)))
+        idxmax (dec (alength colors))
         buf (BufferUtil/newFloatBuffer (* words-per-color num-verts))]
 
     (let [ni (int (dec nu)), nj (int (dec nv))]
       (loop [i (int 0)]
         (doto buf
-          (.put zero) (.put zero) (.put zero) (.put zero)
-          (.put zero) (.put zero) (.put zero) (.put zero))
+          (.put float0) (.put float0) (.put float0) (.put float0)
+          (.put float0) (.put float0) (.put float0) (.put float0))
 
         (let [j0 (* i nj), j1 (+ j0 nj)]
           (loop [j j0]
-            (value-to-color (aget values j) color-temp)
-            (let [r (aget color-temp 0)
-                  g (aget color-temp 1)
-                  b (aget color-temp 2)
-                  a (aget color-temp 3)]
+            (let [value (aget values j)
+                  inrange-idx (int (* offset-to-index (- value valmin)))
+                  idx (Math/max int0 (Math/min idxmax (inc inrange-idx)))
+                  #^floats c (aget colors idx)
+                  r (aget c 0), g (aget c 1), b (aget c 2), a (aget c 3)]
               (doto buf
                 (.put r) (.put g) (.put b) (.put a)
                 (.put r) (.put g) (.put b) (.put a)))
@@ -108,6 +113,30 @@
 
 
 
+
+(defn float-array2d [values]
+  (into-array
+    (map
+      #(into-array Float/TYPE (map float %))
+      values)))
+
+
+(defn make-colors
+  ([fraction-to-rgba len color-below color-above]
+    (float-array2d
+      (concat
+        [(or color-below (fraction-to-rgba 0))]
+        (map #(fraction-to-rgba (/ % len)) (range len))
+        [(or color-above (fraction-to-rgba 1))])))
+  ([fraction-to-rgba len]
+    (make-colors fraction-to-rgba len nil nil)))
+
+
+(defn gray [fraction]
+  [fraction fraction fraction 1])
+
+
+
 (def nu 350)
 (def nv 150)
 (def values (double-array (take (* nu nv) (repeatedly rand))))
@@ -115,20 +144,13 @@
 (def u [0.9 -0.1])
 (def v [0.4 2.3])
 
-(defn value-to-color [cell-value #^floats rgba-array]
-  (let [one (float 1)
-        zero (float 0)
-        v (float cell-value)]
-    (aset rgba-array 0 v)
-    (aset rgba-array 1 zero)
-    (aset rgba-array 2 (- one v))
-    (aset rgba-array 3 one)))
+(def gray64 (make-colors gray 64))
 
 
 (defn draw-surf [#^GL gl data x-coordfn y-coordfn attrs]
   (let [num-verts (get-num-verts nu nv)
         verts (time2 "make-vertex-buffer" (make-vertex-buffer x-coordfn y-coordfn nu nv))
-        colors (time2 "make-color-buffer " (make-color-buffer values value-to-color nu nv))]
+        colors (time2 "make-color-buffer " (make-color-buffer values nu nv gray64 0 1))]
 
     (doto gl
       (.glShadeModel GL/GL_FLAT)
