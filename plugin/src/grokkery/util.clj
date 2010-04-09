@@ -80,3 +80,10 @@
            (.glMatrixMode ~GL/GL_PROJECTION)
            (.glPopMatrix)
            (.glPopAttrib))))))
+
+
+(defmacro stopwatch [msg expr]
+  `(let [start# (System/nanoTime)
+         ret# ~expr]
+     (prn (str ~msg " -- elapsed time: " (* 1e-6 (double (- (System/nanoTime) start#))) " ms"))
+     ret#))
