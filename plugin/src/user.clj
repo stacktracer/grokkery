@@ -69,25 +69,48 @@
 
 
 (defn #^FloatBuffer make-vertex-buffer [x-coordfn y-coordfn nu nv]
-  (let [num-verts (get-num-verts nu nv)
-        buf (BufferUtil/newFloatBuffer (* words-per-vert num-verts))]
+  (let [grid-x (make-array Float/TYPE (inc nu) (inc nv))
+        grid-y (make-array Float/TYPE (inc nu) (inc nv))]
 
-    (let [gx-step (float (/ 1 nu)), gy-step (float (/ 1 nv))
-          ni (int (dec nu)), nj (int nv)]
+    (let [ni (int nu)
+          nj (int nv)
+          gx-step (float (/ 1 nu))
+          gy-step (float (/ 1 nv))]
       (loop [i (int 0)]
-        (loop [j (int 0)]
-          (let [gxa (* i gx-step), gxb (+ gxa gx-step), gy (* j gy-step),
-                xa (float (x-coordfn gxa gy)), ya (float (y-coordfn gxa gy)),
-                xb (float (x-coordfn gxb gy)), yb (float (y-coordfn gxb gy))]
-            (doto buf
-              (.put xa) (.put ya)
-              (.put xb) (.put yb)))
-        (when (< j nj) (recur (inc j))))
-      (when (< i ni) (recur (inc i)))))
+        (let [column-x #^floats (aget grid-x i)
+              column-y #^floats (aget grid-y i)]
+          (loop [j (int 0)]
+            (let [gx (* i gx-step)
+                  gy (* j gy-step)
+                  x (float (x-coordfn gx gy))
+                  y (float (y-coordfn gx gy))]
+              (aset column-x j x)
+              (aset column-y j y))
+            (when (< j nj) (recur (inc j)))))
+        (when (< i ni) (recur (inc i)))))
 
-    (.flip buf)
-    buf))
+    (let [ni (int (dec nu))
+          nj (int nv)
+          num-verts (get-num-verts nu nv)
+          buf (BufferUtil/newFloatBuffer (* words-per-vert num-verts))]
+      (loop [i (int 0)]
+        (let [column-xa #^floats (aget grid-x i)
+              column-ya #^floats (aget grid-y i)
+              column-xb #^floats (aget grid-x (inc i))
+              column-yb #^floats (aget grid-y (inc i))]
+          (loop [j (int 0)]
+            (let [xa (aget column-xa j)
+                  ya (aget column-ya j)
+                  xb (aget column-xb j)
+                  yb (aget column-yb j)]
+              (doto buf
+                (.put xa) (.put ya)
+                (.put xb) (.put yb)))
+            (when (< j nj) (recur (inc j)))))
+        (when (< i ni) (recur (inc i))))
 
+      (.flip buf)
+      buf)))
 
 
 
