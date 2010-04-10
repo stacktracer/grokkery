@@ -4,6 +4,7 @@
     [grokkery.util]
     [grokkery]
     [grokkery.color2d :only [color2d]]
+    [grokkery.colors]
     [clojure.contrib.seq-utils]
     [clojure.contrib.generic.math-functions]))
 
