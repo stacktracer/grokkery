@@ -34,7 +34,7 @@
         idxmax (dec (alength cscale-colors))
         buf (BufferUtil/newFloatBuffer (* words-per-color num-verts))]
 
-    (let [ni (int (dec nc)), nj (int (dec nr))]
+    (let [ni (int nc), nj (int nr)]
       (loop [i (int 0)]
         (doto buf
           (.put float0) (.put float0) (.put float0) (.put float0)
@@ -50,8 +50,8 @@
               (doto buf
                 (.put r) (.put g) (.put b) (.put a)
                 (.put r) (.put g) (.put b) (.put a)))
-            (when (< j j1) (recur (inc j)))))
-        (when (< i ni) (recur (inc i)))))
+            (when (< (inc j) j1) (recur (inc j)))))
+        (when (< (inc i) ni) (recur (inc i)))))
 
     (.flip buf)
     buf))
