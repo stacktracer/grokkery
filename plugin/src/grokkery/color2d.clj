@@ -40,7 +40,7 @@
           (.put float0) (.put float0) (.put float0) (.put float0)
           (.put float0) (.put float0) (.put float0) (.put float0))
 
-        (let [j0 (* i nj), j1 (+ j0 nj)]
+        (let [j0 (unchecked-multiply i nj), j1 (unchecked-add j0 nj)]
           (loop [j j0]
             (let [v (aget values j)
                   inrange-idx (* offset-to-index (- v vmin))
@@ -50,8 +50,8 @@
               (doto buf
                 (.put r) (.put g) (.put b) (.put a)
                 (.put r) (.put g) (.put b) (.put a)))
-            (when (< (inc j) j1) (recur (inc j)))))
-        (when (< (inc i) ni) (recur (inc i)))))
+            (when (< (unchecked-inc j) j1) (recur (unchecked-inc j)))))
+        (when (< (unchecked-inc i) ni) (recur (unchecked-inc i)))))
 
     (.flip buf)
     buf))
