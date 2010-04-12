@@ -94,44 +94,12 @@
         (float (/ (* 1000 (inc (:count old-fpsinfo))) (- (:start new-fpsinfo) (:start old-fpsinfo))))))))
 
 
-(defn- #^GLCanvas make-gl-canvas [parent fignum]
-  (let [bounds (ref {:x 0, :y 0, :width 0, :height 0})
-        fpsinfo (ref {})
-        canvas (GLSimpleSwtCanvas.
-                 parent
-                 (into-array GLSimpleListener
-                   [(proxy [GLSimpleListener] []
-                      
-                      (init [#^GLContext context]
-                        (doto (.getGL context)
-                          (.setSwapInterval 0)
-                          (.glClearColor 1 1 1 1)))
-                      
-                      (display [#^GLContext context]
-                        (doto (.getGL context)
-                          (.glClear GL/GL_COLOR_BUFFER_BIT)
-                          (draw-plots fignum))
-                        (dosync (alter fpsinfo update-fpsinfo)))
-                      
-                      (reshape [#^GLContext context x y width height]
-                        (dosync
-                          (ref-set bounds {:x x, :y y, :width width, :height height})))
-                      
-                      (displayChanged [context modeChanged deviceChanged]))]))]
-    
-    (add-watch fpsinfo fignum handle-fpsinfo-change)
-    (.start (GLSimpleSwtAnimator. 30 canvas))
-    canvas))
-
-
-(defn- #^GLCanvas make-content-canvas [parent fignum]
+(defn- attach-content-mouse-listeners [fignum content-canvas]
   (let [grab-coords (ref {})
-        canvas (make-gl-canvas parent fignum)
-        
         get-mouse-coords (fn [event]
                            (get-coords (get-fig fignum)
-                             (/ (.x event) (.. canvas (getSize) x))
-                             (- 1 (/ (.y event) (.. canvas (getSize) y)))))
+                             (/ (.x event) (.. content-canvas (getSize) x))
+                             (- 1 (/ (.y event) (.. content-canvas (getSize) y)))))
         
         ; Up/down events are sometimes interleaved with move events out of order.
         ; To deal with this, we track the button state manually: @grab-coords is
@@ -148,17 +116,43 @@
                              (dosync
                                (ref-set grab-coords nil)))]
     
-    (.setCursor canvas (Cursor. (.getDisplay canvas) SWT/CURSOR_SIZEALL))
+    (.setCursor content-canvas (Cursor. (.getDisplay content-canvas) SWT/CURSOR_SIZEALL))
     
-    (add-listener canvas SWT/MouseUp on-release-or-move)
-    (add-listener canvas SWT/MouseDown on-press-or-drag)
-    (add-listener canvas SWT/MouseMove #(if (mouse-button-down? %) (on-press-or-drag %) (on-release-or-move %)))
+    (add-listener content-canvas SWT/MouseUp on-release-or-move)
+    (add-listener content-canvas SWT/MouseDown on-press-or-drag)
+    (add-listener content-canvas SWT/MouseMove #(if (mouse-button-down? %) (on-press-or-drag %) (on-release-or-move %)))
     
-    (add-listener canvas SWT/MouseWheel
+    (add-listener content-canvas SWT/MouseWheel
       (fn [event]
         (dosync
-          (zoom fignum (- (.count event)) (get-mouse-coords event)))))
+          (zoom fignum (- (.count event)) (get-mouse-coords event)))))))
+
+
+(defn- make-content-gl-listener [fignum]
+  (let [fpsinfo (add-watch (ref {}) fignum handle-fpsinfo-change)]
+  
+    (proxy [GLSimpleListener] []
     
+      (init [#^GLContext context]
+        (doto (.getGL context)
+          (.setSwapInterval 0)
+          (.glClearColor 1 1 1 1)))
+      
+      (display [#^GLContext context]
+        (doto (.getGL context)
+          (.glClear GL/GL_COLOR_BUFFER_BIT)
+          (draw-plots fignum))
+        (dosync (alter fpsinfo update-fpsinfo)))
+      
+      (reshape [#^GLContext context x y width height])
+      
+      (displayChanged [#^GLContext context modeChanged deviceChanged]))))
+
+
+(defn- #^GLCanvas make-content-canvas [parent fignum]
+  (let [canvas (GLSimpleSwtCanvas. parent (into-array GLSimpleListener [(make-content-gl-listener fignum)]))]
+    (attach-content-mouse-listeners fignum canvas)
+    (.start (GLSimpleSwtAnimator. 30 canvas))
     canvas))
 
 
