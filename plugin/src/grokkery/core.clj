@@ -96,7 +96,13 @@
   (defn set-coordlims [fignum coordkey coordlims]
     (dosync
       (alter figs
-        assoc-in [fignum :limits coordkey] coordlims))))
+        assoc-in [fignum :limits coordkey] coordlims)))
+  
+  
+  (defn derive-coord [fignum derived-coordkey derived-coordfn]
+    (dosync
+      (alter figs
+        assoc-in [fignum :derived-coords derived-coordkey] derived-coordfn))))
 
 
 
@@ -153,6 +159,12 @@
   (update-coords fignum plotnum assoc coordkey coordfn))
 
 
+(defn get-coordfn [fig plot coordkey]
+  (or
+    (get (:coords plot) coordkey)
+    (if-let [dcoordfn (get (:derived-coords fig) coordkey)] (partial dcoordfn plot))))
+
+
 (defn set-drawfn [fignum plotnum drawfn]
   (set-plot-field fignum plotnum :drawfn drawfn))
 
@@ -197,6 +209,20 @@
 
 
 
+(defmacro derived-coordfn [bindings & body]
+  (let [plot-sym (gensym 'plot)
+        args-sym (gensym 'args)]
+    `(fn [~plot-sym & ~args-sym]
+       (let
+         ~(vec
+            (mapcat
+              (fn [%] [(first %) `(if-let [coordfn# (get (:coords ~plot-sym) ~(second %))] (apply coordfn# ~args-sym))])
+              (partition 2 bindings)))
+         ~@body))))
+
+
+
+
 (defn prep-plot [#^GL gl xlim ylim]
   (doto gl
     (.glMatrixMode GL/GL_PROJECTION)
@@ -219,11 +245,11 @@
   (let [plot (get-plot fig plotnum)
         
         x-coordkey (:bottom axis-coordkeys)
-        x-coordfn (get (:coords plot) x-coordkey)
+        x-coordfn (get-coordfn fig plot x-coordkey)
         x-limits (get-valid-limits (get-coordlims fig x-coordkey))
         
         y-coordkey (:left axis-coordkeys)
-        y-coordfn (get (:coords plot) y-coordkey)
+        y-coordfn (get-coordfn fig plot y-coordkey)
         y-limits (get-valid-limits (get-coordlims fig y-coordkey))
         
         drawfn (:drawfn plot)]
