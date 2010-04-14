@@ -1,4 +1,4 @@
-(ns grokkery.rcp.content-area
+(ns grokkery.rcp.content-canvas
   (:use
     grokkery.util
     grokkery.core)

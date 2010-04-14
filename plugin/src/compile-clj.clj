@@ -4,7 +4,8 @@
     (map compile
       ['grokkery.util
        'grokkery.core
-       'grokkery.rcp.content-area
+       'grokkery.rcp.axis-canvas
+       'grokkery.rcp.content-canvas
        'grokkery.rcp.GrokkeryService
        'grokkery.rcp.GrokkeryPlugin
        'grokkery.rcp.ReplConsole
