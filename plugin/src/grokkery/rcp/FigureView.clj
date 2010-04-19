@@ -5,12 +5,10 @@
     grokkery.rcp.axis-canvas
     grokkery.rcp.content-canvas)
   (:import
-    [javax.media.opengl GL GLContext]
     [org.eclipse.ui IWorkbenchPage IViewPart]
-    [org.eclipse.swt.opengl GLCanvas]
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.graphics GC Cursor]
-    [org.eclipse.swt.widgets Canvas Listener Event Composite])
+    [org.eclipse.swt.graphics GC]
+    [org.eclipse.swt.widgets Composite])
   (:gen-class
     :extends org.eclipse.ui.part.ViewPart
     :state state
