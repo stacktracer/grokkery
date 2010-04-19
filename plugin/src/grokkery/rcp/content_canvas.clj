@@ -3,13 +3,12 @@
     grokkery.util
     grokkery.core)
   (:import
-    [javax.media.opengl GL GLContext]
-    [org.eclipse.swt.opengl GLCanvas]
-    [org.eclipse.swt SWT]
+    [java.util Timer TimerTask]
+    [javax.media.opengl GL GLContext GLDrawableFactory]
+    [org.eclipse.swt SWT SWTException]
+    [org.eclipse.swt.opengl GLCanvas GLData]
     [org.eclipse.swt.graphics GC Cursor]
-    [org.eclipse.swt.widgets Listener Event]
-    [glsimple GLSimpleListener]
-    [glsimple.swt GLSimpleSwtCanvas GLSimpleSwtAnimator]))
+    [org.eclipse.swt.widgets Canvas Listener Event]))
 
 
 (def target-fps 30)
@@ -37,12 +36,12 @@
         (float (/ (* 1000 (inc (:count old-fpsinfo))) (- (:start new-fpsinfo) (:start old-fpsinfo))))))))
 
 
-(defn- attach-mouse-listeners [fignum canvas]
+(defn- attach-mouse-listeners [#^Canvas canvas fignum]
   (let [grab-coords (ref {})
-        get-mouse-coords (fn [event]
+        get-mouse-coords (fn [#^Event event]
                            (get-coords (get-fig fignum)
-                             (/ (.x event) (.. canvas (getSize) x))
-                             (- 1 (/ (.y event) (.. canvas (getSize) y)))))
+                             (/ (float (.x event)) (float (.. canvas (getSize) x)))
+                             (- 1 (/ (float (.y event)) (float (.. canvas (getSize) y))))))
         
         ; Up/down events are sometimes interleaved out of order wrt move events.
         ; To deal with this, we track the button state manually: @grab-coords is
@@ -66,34 +65,77 @@
     (add-listener canvas SWT/MouseMove #(if (mouse-button-down? %) (on-press-or-drag %) (on-release-or-move %)))
     
     (add-listener canvas SWT/MouseWheel
-      (fn [event]
+      (fn [#^Event event]
         (dosync
           (zoom fignum (- (.count event)) (get-mouse-coords event)))))))
 
 
-(defn- make-gl-listener [fignum]
-  (let [fpsinfo (add-watch (ref {}) fignum handle-fpsinfo-change)]
-  
-    (proxy [GLSimpleListener] []
-    
-      (init [#^GLContext context]
-        (doto (.getGL context)
-          (.setSwapInterval 0)
-          (.glClearColor 1 1 1 1)))
-      
-      (display [#^GLContext context]
-        (doto (.getGL context)
-          (.glClear GL/GL_COLOR_BUFFER_BIT)
-          (draw-plots fignum))
-        (dosync (alter fpsinfo update-fpsinfo)))
-      
-      (reshape [#^GLContext context x y width height])
-      
-      (displayChanged [#^GLContext context modeChanged deviceChanged]))))
+(defn- #^GLCanvas make-gl-canvas [parent]
+  (let [gl-data (GLData.)]
+    (set! (.doubleBuffer gl-data) true)
+    (GLCanvas. parent SWT/NONE gl-data)))
+
+
+(defn- #^GLContext create-gl-context [#^GLCanvas canvas]
+  (.setCurrent canvas)
+  (.. GLDrawableFactory (getFactory) (createExternalGLContext)))
+
+
+(defn- init-gl [#^GL gl]
+  (.setSwapInterval gl 0)
+  (.glClearColor gl 1 1 1 1))
+
+
+(defn- #^TimerTask make-redraw-task [#^Canvas canvas f]
+  (proxy [TimerTask] []
+    (run []
+      (try
+        (..
+          canvas
+          (getDisplay)
+          (syncExec (fn [] (when (not (.isDisposed canvas)) (f)))))
+        (catch SWTException e
+          (when-not (#{SWT/ERROR_DEVICE_DISPOSED SWT/ERROR_WIDGET_DISPOSED} (.code e)) (throw e)))))))
+
+
+(defn- start-animator [fignum canvas fps f]
+  (doto (Timer. (format "Fig %d Animator" fignum) true)
+    (.schedule (make-redraw-task canvas f) (long 0) (long (max 1 (/ 1000 fps))))))
 
 
 (defn #^GLCanvas make-content-canvas [parent fignum]
-  (let [canvas (GLSimpleSwtCanvas. parent (into-array GLSimpleListener [(make-gl-listener fignum)]))]
-    (attach-mouse-listeners fignum canvas)
-    (.start (GLSimpleSwtAnimator. target-fps canvas))
+  (let [canvas (make-gl-canvas parent)
+        context (create-gl-context canvas)
+        gl (.getGL context)
+        reshaped (ref true)
+        fpsinfo (add-watch (ref {}) fignum handle-fpsinfo-change)]
+      
+      (attach-mouse-listeners canvas fignum)
+      
+      (add-listener canvas SWT/Resize (fn [ev] (dosync (ref-set reshaped true))))
+      
+      (.setCurrent canvas)
+      (.makeCurrent context)
+      (init-gl gl)
+      
+      (start-animator fignum canvas target-fps
+        #(do
+           (.setCurrent canvas)
+           (.makeCurrent context)
+           (let [gl (.getGL context)]
+           
+             (when @reshaped
+               (let [bounds (.getBounds canvas)
+                     w (.width bounds)
+                     h (.height bounds)]
+                 (.glViewport gl 0 0 w h))
+               (dosync (ref-set reshaped false)))
+             
+             (.glClear gl GL/GL_COLOR_BUFFER_BIT)
+             (draw-plots gl fignum))
+           
+           (.swapBuffers canvas)
+           (.release context)
+           (dosync (alter fpsinfo update-fpsinfo))))
+    
     canvas))

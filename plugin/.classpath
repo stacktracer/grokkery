@@ -6,7 +6,6 @@
 	<classpathentry kind="lib" path="build/classes2"/>
 	<classpathentry kind="lib" path="lib/clojure-contrib.jar"/>
 	<classpathentry kind="lib" path="lib/clojure.jar" sourcepath="lib/clojure-src.jar"/>
-	<classpathentry kind="lib" path="lib/glsimple.jar"/>
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.jar"/>
 	<classpathentry kind="output" path="build/classes"/>

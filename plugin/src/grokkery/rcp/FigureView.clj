@@ -10,9 +10,7 @@
     [org.eclipse.swt.opengl GLCanvas]
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics GC Cursor]
-    [org.eclipse.swt.widgets Canvas Listener Event Composite]
-    [glsimple GLSimpleListener]
-    [glsimple.swt GLSimpleSwtCanvas GLSimpleSwtAnimator])
+    [org.eclipse.swt.widgets Canvas Listener Event Composite])
   (:gen-class
     :extends org.eclipse.ui.part.ViewPart
     :state state
