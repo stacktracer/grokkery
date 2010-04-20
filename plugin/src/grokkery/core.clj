@@ -246,11 +246,11 @@
         
         x-coordkey (:bottom axis-coordkeys)
         x-coordfn (get-coordfn fig plot x-coordkey)
-        x-limits (get-valid-limits (get-coordlims fig x-coordkey))
+        x-limits (get-coordlims fig x-coordkey)
         
         y-coordkey (:left axis-coordkeys)
         y-coordfn (get-coordfn fig plot y-coordkey)
-        y-limits (get-valid-limits (get-coordlims fig y-coordkey))
+        y-limits (get-coordlims fig y-coordkey)
         
         drawfn (:drawfn plot)]
     
