@@ -6,10 +6,11 @@
     grokkery.rcp.waxis-canvas
     grokkery.rcp.content-canvas)
   (:import
+    [java.util Timer TimerTask]
     [org.eclipse.ui IWorkbenchPage IViewPart]
-    [org.eclipse.swt SWT]
+    [org.eclipse.swt SWT SWTException]
     [org.eclipse.swt.graphics GC]
-    [org.eclipse.swt.widgets Composite])
+    [org.eclipse.swt.widgets Composite Control])
   (:gen-class
     :extends org.eclipse.ui.part.ViewPart
     :state state
@@ -19,6 +20,8 @@
 
 (def id "grokkery.rcp.FigureView")
 
+
+(def max-fps 30)
 
 
 
@@ -48,11 +51,52 @@
     (.init figview site)))
 
 
+(defn- redraw-all [#^Control control]
+  (let [size (.getSize control)
+        width (.x size)
+        height (.y size)]
+  (.redraw control 0 0 width height true)))
+
+
+(defn- #^TimerTask make-redraw-task [#^Control control redraw?]
+  (proxy [TimerTask] []
+    (run []
+      (try
+        (..
+          control
+          (getDisplay)
+          (syncExec
+            #(when (and
+                     (not (.isDisposed control))
+                     @redraw?)
+               (redraw-all control)
+               (dosync (ref-set redraw? false)))))
+        
+        (catch SWTException e
+          (when-not (#{SWT/ERROR_DEVICE_DISPOSED SWT/ERROR_WIDGET_DISPOSED} (.code e))
+            (throw e)))))))
+
+
+(defn- start-animator [#^Control control fps fignum]
+  (let [thread-name (format "Fig %d Animator" fignum)
+        timer (Timer. thread-name true)
+        redraw? (ref true)]
+    (.schedule timer
+      (make-redraw-task control redraw?)
+      (long 0)
+      (long (max 1 (/ 1000 fps))))
+    #(dosync (ref-set redraw? true))))
+
+
 (defn -createPartControl [figview #^Composite parent]
   (let [fignum (get-fignum figview)
         saxis-canvas (make-saxis-canvas parent fignum)
         waxis-canvas (make-waxis-canvas parent fignum)
-        content-canvas (make-content-canvas parent fignum)]
+        content-canvas (make-content-canvas parent fignum)
+        trigger-redraw (start-animator parent max-fps fignum)]
+    
+    (add-watch (get-figref fignum) fignum
+      (fn [& _] (trigger-redraw)))
     
     (.setLayout parent nil)
     (add-listener parent SWT/Resize

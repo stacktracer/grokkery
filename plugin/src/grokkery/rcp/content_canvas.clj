@@ -3,15 +3,11 @@
     grokkery.util
     grokkery.core)
   (:import
-    [java.util Timer TimerTask]
     [javax.media.opengl GL GLContext GLDrawableFactory]
-    [org.eclipse.swt SWT SWTException]
+    [org.eclipse.swt SWT]
     [org.eclipse.swt.opengl GLCanvas GLData]
     [org.eclipse.swt.graphics GC Cursor]
     [org.eclipse.swt.widgets Canvas Listener Event]))
-
-
-(def target-fps 30)
 
 
 (defn- attach-mouse-listeners [#^Canvas canvas fignum]
@@ -64,54 +60,41 @@
   (.glClearColor gl 1 1 1 1))
 
 
-(defn- #^TimerTask make-redraw-task [#^Canvas canvas f]
-  (proxy [TimerTask] []
-    (run []
-      (try
-        (..
-          canvas
-          (getDisplay)
-          (syncExec (fn [] (when (not (.isDisposed canvas)) (f)))))
-        (catch SWTException e
-          (when-not (#{SWT/ERROR_DEVICE_DISPOSED SWT/ERROR_WIDGET_DISPOSED} (.code e)) (throw e)))))))
-
-
-(defn- start-animator [fignum canvas fps f]
-  (doto (Timer. (format "Fig %d Animator" fignum) true)
-    (.schedule (make-redraw-task canvas f) (long 0) (long (max 1 (/ 1000 fps))))))
-
-
 (defn #^GLCanvas make-content-canvas [parent fignum]
   (let [canvas (make-gl-canvas parent)
         context (create-gl-context canvas)
         gl (.getGL context)
         reshaped (ref true)]
-      
-      (attach-mouse-listeners canvas fignum)
-      
-      (add-listener canvas SWT/Resize (fn [ev] (dosync (ref-set reshaped true))))
-      
-      (.setCurrent canvas)
-      (.makeCurrent context)
-      (init-gl gl)
-      
-      (start-animator fignum canvas target-fps
-        #(do
-           (.setCurrent canvas)
-           (.makeCurrent context)
-           (let [gl (.getGL context)]
-           
-             (when @reshaped
-               (let [bounds (.getBounds canvas)
-                     w (.width bounds)
-                     h (.height bounds)]
-                 (.glViewport gl 0 0 w h))
-               (dosync (ref-set reshaped false)))
-             
-             (.glClear gl GL/GL_COLOR_BUFFER_BIT)
-             (draw-plots gl fignum))
-           
-           (.swapBuffers canvas)
-           (.release context)))
+    
+    (attach-mouse-listeners canvas fignum)
+    
+    (.setCurrent canvas)
+    (.makeCurrent context)
+    (init-gl gl)
+    
+    (add-listener canvas SWT/Resize
+      (fn [event]
+        (dosync
+          (ref-set reshaped true))))
+    
+    (add-listener canvas SWT/Paint
+      (fn [event]
+        (.setCurrent canvas)
+        (.makeCurrent context)
+        
+        (let [gl (.getGL context)]
+          
+          (when @reshaped
+            (let [bounds (.getBounds canvas)
+                  w (.width bounds)
+                  h (.height bounds)]
+              (.glViewport gl 0 0 w h))
+            (dosync (ref-set reshaped false)))
+
+          (.glClear gl GL/GL_COLOR_BUFFER_BIT)
+          (draw-plots gl fignum))
+        
+        (.swapBuffers canvas)
+        (.release context)))
     
     canvas))
