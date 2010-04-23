@@ -2,7 +2,8 @@
   (:use
     grokkery.util
     grokkery.core
-    grokkery.rcp.axis-canvas
+    grokkery.rcp.saxis-canvas
+    grokkery.rcp.waxis-canvas
     grokkery.rcp.content-canvas)
   (:import
     [org.eclipse.ui IWorkbenchPage IViewPart]
@@ -56,8 +57,8 @@
 
 (defn -createPartControl [figview #^Composite parent]
   (let [fignum (get-fignum figview)
-        xaxis-canvas (make-axis-canvas parent fignum)
-        yaxis-canvas (make-axis-canvas parent fignum)
+        saxis-canvas (make-saxis-canvas parent fignum)
+        waxis-canvas (make-waxis-canvas parent fignum)
         content-canvas (make-content-canvas parent fignum)]
     
     (.setLayout parent nil)
@@ -65,15 +66,16 @@
       (fn [event]
         (let [gc (GC. parent)
               parent-width (.. parent (getSize) x)
-              parent-height (.. parent (getSize) y)]
+              parent-height (.. parent (getSize) y)
+              fig (get-fig fignum)]
           (try
-            (let [yaxis-width (get-yaxis-width gc)
-                  xaxis-height (get-xaxis-height gc)
-                  content-width (- parent-width yaxis-width)
-                  content-height (- parent-height xaxis-height)]
-              (.setBounds yaxis-canvas 0 0 yaxis-width content-height)
-              (.setBounds xaxis-canvas yaxis-width content-height content-width xaxis-height)
-              (.setBounds content-canvas yaxis-width 0 content-width content-height))
+            (let [saxis-height (get-saxis-height fig gc)
+                  content-height (- parent-height saxis-height)
+                  waxis-width (get-waxis-width fig gc content-height)
+                  content-width (- parent-width waxis-width)]
+              (.setBounds waxis-canvas 0 0 waxis-width content-height)
+              (.setBounds saxis-canvas waxis-width content-height content-width saxis-height)
+              (.setBounds content-canvas waxis-width 0 content-width content-height))
             (finally (.dispose gc))))))
     
     (dosync

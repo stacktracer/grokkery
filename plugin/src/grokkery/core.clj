@@ -119,6 +119,10 @@
   (get-in fig [:axes axiskey]))
 
 
+(defn get-axislims [fig axiskey]
+  (get-coordlims fig (get-coordkey fig axiskey)))
+
+
 (defn get-coord [fig coordkey fraction]
   (let [lims (get-coordlims fig coordkey)
         min (min-of lims)

@@ -4,7 +4,8 @@
     (map compile
       ['grokkery.util
        'grokkery.core
-       'grokkery.rcp.axis-canvas
+       'grokkery.rcp.saxis-canvas
+       'grokkery.rcp.waxis-canvas
        'grokkery.rcp.content-canvas
        'grokkery.rcp.GrokkeryService
        'grokkery.rcp.GrokkeryPlugin
