@@ -14,28 +14,6 @@
 (def target-fps 30)
 
 
-(def fpsinfo-reset-interval 10000)
-
-
-(defn- update-fpsinfo [fpsinfo]
-  (let [now (System/currentTimeMillis)]
-    (if (or
-          (not-every? fpsinfo [:count :start])
-          (> now (+ (:start fpsinfo) fpsinfo-reset-interval)))
-      {:count 0, :start now}
-      (update-in fpsinfo [:count] inc))))
-
-
-(defn- handle-fpsinfo-change [fignum ref old-fpsinfo new-fpsinfo]
-  (when (and
-          (every? old-fpsinfo [:count :start])
-          (not= (:start old-fpsinfo) (:start new-fpsinfo)))
-    (println
-      (format "Fig %d refresh rate: %.1f fps"
-        fignum
-        (float (/ (* 1000 (inc (:count old-fpsinfo))) (- (:start new-fpsinfo) (:start old-fpsinfo))))))))
-
-
 (defn- attach-mouse-listeners [#^Canvas canvas fignum]
   (let [grab-coords (ref {})
         get-mouse-coords (fn [#^Event event]
@@ -107,8 +85,7 @@
   (let [canvas (make-gl-canvas parent)
         context (create-gl-context canvas)
         gl (.getGL context)
-        reshaped (ref true)
-        fpsinfo (add-watch (ref {}) fignum handle-fpsinfo-change)]
+        reshaped (ref true)]
       
       (attach-mouse-listeners canvas fignum)
       
@@ -135,7 +112,6 @@
              (draw-plots gl fignum))
            
            (.swapBuffers canvas)
-           (.release context)
-           (dosync (alter fpsinfo update-fpsinfo))))
+           (.release context)))
     
     canvas))
