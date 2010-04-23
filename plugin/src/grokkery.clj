@@ -6,7 +6,7 @@
     grokkery.core))
 
 
-(def default-axes {:bottom :x, :left :y})
+(def default-axes {:south :x, :west :y})
 
 (def default-limits {:x fallback-coordlims, :y fallback-coordlims})
 

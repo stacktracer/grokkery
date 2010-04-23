@@ -73,7 +73,7 @@
 
 
 (defn- get-waxis-lims [fig]
-  (let [lims (get-axislims fig :left)]
+  (let [lims (get-axislims fig :west)]
     {:min (min-of lims), :max (max-of lims)}))
 
 

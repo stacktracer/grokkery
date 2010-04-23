@@ -138,10 +138,10 @@
 (defn get-coords [fig x-fraction y-fraction]
   (dissoc
     (merge
-      (coord-entry fig :top    x-fraction)
-      (coord-entry fig :bottom x-fraction)
-      (coord-entry fig :left   y-fraction)
-      (coord-entry fig :right  y-fraction))
+      (coord-entry fig :north x-fraction)
+      (coord-entry fig :south x-fraction)
+      (coord-entry fig :east  y-fraction)
+      (coord-entry fig :west  y-fraction))
     nil))
 
 
@@ -181,8 +181,8 @@
   (update-plot-field fignum plotnum :attrs f args))
 
 
-(defn set-axes [fignum bottom-coordkey left-coordkey]
-  (update-axes fignum merge {:bottom bottom-coordkey, :left left-coordkey}))
+(defn set-axes [fignum south-coordkey west-coordkey]
+  (update-axes fignum merge {:south south-coordkey, :west west-coordkey}))
 
 
 (defn pan
@@ -248,11 +248,11 @@
 (defn draw-plot [#^GL gl fig plotnum axis-coordkeys]
   (let [plot (get-plot fig plotnum)
         
-        x-coordkey (:bottom axis-coordkeys)
+        x-coordkey (:south axis-coordkeys)
         x-coordfn (get-coordfn fig plot x-coordkey)
         x-limits (get-coordlims fig x-coordkey)
         
-        y-coordkey (:left axis-coordkeys)
+        y-coordkey (:west axis-coordkeys)
         y-coordfn (get-coordfn fig plot y-coordkey)
         y-limits (get-coordlims fig y-coordkey)
         
