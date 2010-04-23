@@ -18,10 +18,10 @@
         prelim-step (pow 10 (round (log10 approx-step)))
         prelim-num-ticks (int (floor (/ (- axis-max axis-min) prelim-step)))]
     (cond
-      (>= prelim-num-ticks (* 5 approx-num-ticks)) (* 5 prelim-step)
-      (>= prelim-num-ticks (* 2 approx-num-ticks)) (* 2 prelim-step)
-      (>= (* 5 prelim-num-ticks) approx-num-ticks) (/ prelim-step 5)
-      (>= (* 2 prelim-num-ticks) approx-num-ticks) (/ prelim-step 2)
+      (>= prelim-num-ticks (* 5 approx-num-ticks)) (* prelim-step 5)
+      (>= prelim-num-ticks (* 2 approx-num-ticks)) (* prelim-step 2)
+      (>= approx-num-ticks (* 5 prelim-num-ticks)) (/ prelim-step 5)
+      (>= approx-num-ticks (* 2 prelim-num-ticks)) (/ prelim-step 2)
       :else prelim-step)))
 
 
