@@ -19,90 +19,116 @@
 
 (let [figs (ref {})]
 
-  (defn get-fig [fignum]
+  (defn get-figref [fignum]
     (@figs fignum))
+  
+  
+  (defn get-fig [fignum]
+    @(get-figref fignum))
+  
+  
+  (defn find-unused-fignum []
+    (first
+      (filter
+        (complement (set (keys @figs)))
+        (iterate inc 0))))
+  
+  
+  (defn add-fig []
+    (dosync
+      (let [fignum (find-unused-fignum)]
+        (alter figs
+          assoc fignum (ref {}))
+        fignum)))
+  
+  
+  (defn remove-fig [fignum]
+    (dosync
+      (alter figs
+        dissoc fignum)))
   
   
   (defn find-unused-plotnum [fig]
     (first
       (filter
-        (complement (set (keys (:plots (get-fig 0)))))
+        (complement (set (keys (:plots fig))))
         (iterate inc 0))))
   
   
   (defn add-plot [fignum data coords drawfn attrs]
     (dosync
-      (let [plotnum (find-unused-plotnum (get-fig fignum))]
-        (alter figs
-          assoc-in [fignum :plots plotnum] {:fig fignum, :plot plotnum, :data data, :coords coords, :drawfn drawfn, :attrs attrs})
+      (let [figref (get-figref fignum)
+            plotnum (find-unused-plotnum @figref)]
+        (alter figref
+          assoc-in [:plots plotnum] {:fig fignum, :plot plotnum, :data data, :coords coords, :drawfn drawfn, :attrs attrs})
         plotnum)))
   
   
   (defn remove-plot [fignum plotnum]
     (dosync
-      (alter figs
-        update-in [fignum :plots] dissoc plotnum)))
+      (alter (get-figref fignum)
+        update-in [:plots] dissoc plotnum)))
   
   
   (defn update-plot-field [fignum plotnum key f args]
     (dosync
-      (alter figs
-        update-in [fignum :plots plotnum key] #(apply f % args))))
+      (alter (get-figref fignum)
+        update-in [:plots plotnum key] #(apply f % args))))
   
   
   (defn set-plot-field [fignum plotnum key value]
     (dosync
-      (alter figs
-        assoc-in [fignum :plots plotnum key] value)))
+      (alter (get-figref fignum)
+        assoc-in [:plots plotnum key] value)))
   
   
   ; Awkward to use directly without varags
   (defn update-attr [fignum plotnum attrkey f args]
     (dosync
-      (alter figs
-        update-in [fignum :plots plotnum :attrs attrkey] #(apply f % args))))
+      (alter (get-figref fignum)
+        update-in [:plots plotnum :attrs attrkey] #(apply f % args))))
   
   
   (defn set-attr [fignum plotnum attrkey attr]
     (dosync
-      (alter figs
-        assoc-in [fignum :plots plotnum :attrs attrkey] attr)))
+      (alter (get-figref fignum)
+        assoc-in [:plots plotnum :attrs attrkey] attr)))
   
   
   (defn update-axes [fignum f args]
     (dosync
-      (alter figs
-        update-in [fignum :axes] #(apply f % args))))
+      (alter (get-figref fignum)
+        update-in [:axes] #(apply f % args))))
   
   
   (defn replace-axes [fignum axes]
     (dosync
-      (alter figs
-        assoc-in [fignum :axes] axes)))
+      (alter (get-figref fignum)
+        assoc :axes axes)))
   
   
   (defn set-limits [fignum limits]
     (dosync
-      (alter figs
-        assoc-in [fignum :limits] limits)))
+      (alter (get-figref fignum)
+        assoc :limits limits)))
   
   
   (defn update-coordlims [fignum coordkey f args]
     (dosync
-      (alter figs
-        update-in [fignum :limits coordkey] #(apply f (get-valid-limits %) args))))
+      (alter (get-figref fignum)
+        update-in [:limits coordkey] #(apply f (get-valid-limits %) args))))
   
   
   (defn set-coordlims [fignum coordkey coordlims]
     (dosync
-      (alter figs
-        assoc-in [fignum :limits coordkey] coordlims)))
+      (alter (get-figref fignum)
+        assoc-in [:limits coordkey] coordlims)))
   
   
   (defn derive-coord [fignum derived-coordkey derived-coordfn]
     (dosync
-      (alter figs
-        assoc-in [fignum :derived-coords derived-coordkey] derived-coordfn))))
+      (alter (get-figref fignum)
+        assoc-in [:derived-coords derived-coordkey] derived-coordfn))))
 
 
 

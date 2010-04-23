@@ -22,16 +22,9 @@
 
 
 
-(let [used-fignum (ref -1)]
-  (defn- take-fignum! []
-    (dosync
-      (alter used-fignum inc))
-    @used-fignum))
-
-
 (defn new-fig []
   (ui-sync-exec
-    #(let [fignum (take-fignum!)]
+    #(let [fignum (add-fig)]
        (.showView (get-active-page) id (str fignum) IWorkbenchPage/VIEW_VISIBLE)
        fignum)))
 
