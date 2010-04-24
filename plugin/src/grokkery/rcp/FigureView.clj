@@ -10,7 +10,7 @@
     [org.eclipse.ui IWorkbenchPage IViewPart]
     [org.eclipse.swt SWT SWTException]
     [org.eclipse.swt.graphics GC]
-    [org.eclipse.swt.widgets Composite Control])
+    [org.eclipse.swt.widgets Composite Control Layout])
   (:gen-class
     :extends org.eclipse.ui.part.ViewPart
     :state state
@@ -51,25 +51,26 @@
     (.init figview site)))
 
 
-(defn- redraw-all [#^Control control]
-  (let [size (.getSize control)
+(defn- redraw-all [#^Composite parent]
+  (.layout parent true true)
+  (let [size (.getSize parent)
         width (.x size)
         height (.y size)]
-  (.redraw control 0 0 width height true)))
+  (.redraw parent 0 0 width height true)))
 
 
-(defn- #^TimerTask make-redraw-task [#^Control control redraw?]
+(defn- #^TimerTask make-redraw-task [#^Composite parent redraw?]
   (proxy [TimerTask] []
     (run []
       (try
         (..
-          control
+          parent
           (getDisplay)
           (syncExec
             #(when (and
-                     (not (.isDisposed control))
+                     (not (.isDisposed parent))
                      @redraw?)
-               (redraw-all control)
+               (redraw-all parent)
                (dosync (ref-set redraw? false)))))
         
         (catch SWTException e
@@ -77,12 +78,12 @@
             (throw e)))))))
 
 
-(defn- start-animator [#^Control control fps fignum]
+(defn- start-animator [#^Composite parent fps fignum]
   (let [thread-name (format "Fig %d Animator" fignum)
         timer (Timer. thread-name true)
         redraw? (ref true)]
     (.schedule timer
-      (make-redraw-task control redraw?)
+      (make-redraw-task parent redraw?)
       (long 0)
       (long (max 1 (/ 1000 fps))))
     #(dosync (ref-set redraw? true))))
@@ -98,22 +99,22 @@
     (add-watch (get-figref fignum) fignum
       (fn [& _] (trigger-redraw)))
     
-    (.setLayout parent nil)
-    (add-listener parent SWT/Resize
-      (fn [event]
-        (let [gc (GC. parent)
-              parent-width (.. parent (getSize) x)
-              parent-height (.. parent (getSize) y)
-              fig (get-fig fignum)]
-          (try
-            (let [saxis-height (get-saxis-height fig gc)
-                  content-height (- parent-height saxis-height)
-                  waxis-width (get-waxis-width fig gc content-height)
-                  content-width (- parent-width waxis-width)]
-              (.setBounds waxis-canvas 0 0 waxis-width content-height)
-              (.setBounds saxis-canvas waxis-width content-height content-width saxis-height)
-              (.setBounds content-canvas waxis-width 0 content-width content-height))
-            (finally (.dispose gc))))))
+    (.setLayout parent
+      (proxy [Layout] []
+        (layout [composite flush-cache?]
+          (let [gc (GC. parent)
+                parent-width (.. parent (getSize) x)
+                parent-height (.. parent (getSize) y)
+                fig (get-fig fignum)]
+            (try
+              (let [saxis-height (get-saxis-height fig gc)
+                    content-height (- parent-height saxis-height)
+                    waxis-width (get-waxis-width fig gc content-height)
+                    content-width (- parent-width waxis-width)]
+                (.setBounds waxis-canvas 0 0 waxis-width content-height)
+                (.setBounds saxis-canvas waxis-width content-height content-width saxis-height)
+                (.setBounds content-canvas waxis-width 0 content-width content-height))
+              (finally (.dispose gc)))))))
     
     (dosync
       (alter (.state figview) assoc :focusable content-canvas))))
