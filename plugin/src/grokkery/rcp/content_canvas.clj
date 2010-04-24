@@ -71,6 +71,7 @@
     (.setCurrent canvas)
     (.makeCurrent context)
     (init-gl gl)
+    (.release context)
     
     (add-listener canvas SWT/Resize
       (fn [event]
