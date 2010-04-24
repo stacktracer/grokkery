@@ -56,7 +56,7 @@
   (let [size (.getSize parent)
         width (.x size)
         height (.y size)]
-  (.redraw parent 0 0 width height true)))
+    (.redraw parent 0 0 width height true)))
 
 
 (defn- #^TimerTask make-redraw-task [#^Composite parent redraw?]
@@ -86,7 +86,9 @@
       (make-redraw-task parent redraw?)
       (long 0)
       (long (max 1 (/ 1000 fps))))
-    #(dosync (ref-set redraw? true))))
+    (fn [& _]
+      (dosync
+        (ref-set redraw? true)))))
 
 
 (defn -createPartControl [figview #^Composite parent]
@@ -96,8 +98,7 @@
         content-canvas (make-content-canvas parent fignum)
         trigger-redraw (start-animator parent max-fps fignum)]
     
-    (add-watch (get-figref fignum) fignum
-      (fn [& _] (trigger-redraw)))
+    (add-watch (get-figref fignum) fignum trigger-redraw)
     
     (.setLayout parent
       (proxy [Layout] []
