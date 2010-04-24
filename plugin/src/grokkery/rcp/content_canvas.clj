@@ -47,7 +47,7 @@
 (defn- #^GLCanvas make-gl-canvas [parent]
   (let [gl-data (GLData.)]
     (set! (.doubleBuffer gl-data) true)
-    (GLCanvas. parent SWT/NONE gl-data)))
+    (GLCanvas. parent SWT/NO_BACKGROUND gl-data)))
 
 
 (defn- #^GLContext create-gl-context [#^GLCanvas canvas]
