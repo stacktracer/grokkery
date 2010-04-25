@@ -18,18 +18,12 @@
 (def right-padding 2)
 
 
-(defn- set-line-width [#^GC gc w]
-  (.setLineWidth gc w))
-
-
-
 (defn get-waxis-lims [fig]
   (get-axis-lims fig :west))
 
 
-(defn- get-waxis-ticks [fig height]
-  (let [approx-num-ticks (/ height pixels-between-ticks)]
-    (get-axis-ticks fig :west approx-num-ticks)))
+(defn get-waxis-ticks [fig height]
+  (get-axis-ticks fig :west height))
 
 
 (defn get-string-width [#^GC gc s]
@@ -61,7 +55,7 @@
     
     ; Tick marks
     (set-fg-color gc tick-color)
-    (set-line-width gc tick-line-width)
+    (.setLineWidth gc tick-line-width)
     (let [i0 width, i1 (- i0 tick-length)]
       (doseq [j (map #(round (double (j-of %))) locs)]
         (.drawLine gc i0 j i1 j)))

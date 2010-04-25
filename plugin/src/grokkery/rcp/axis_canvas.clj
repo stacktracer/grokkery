@@ -55,8 +55,9 @@
     {:min (min-of lims), :max (max-of lims)}))
 
 
-(defn get-axis-ticks [fig axiskey approx-num-ticks]
+(defn get-axis-ticks [fig axiskey extent-pixels]
   (let [{:keys [min max]} (get-axis-lims fig axiskey)
+        approx-num-ticks (/ extent-pixels pixels-between-ticks)
         step (get-tick-step min max approx-num-ticks)
         locs (get-tick-locations min max step)]
     {:step step, :locs locs}))
