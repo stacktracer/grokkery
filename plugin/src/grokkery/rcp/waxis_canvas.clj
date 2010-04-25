@@ -2,69 +2,20 @@
   (:use
     clojure.contrib.import-static
     grokkery.util
-    grokkery.core)
+    grokkery.core
+    grokkery.rcp.axis-canvas)
   (:import
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics GC Cursor]
     [org.eclipse.swt.widgets Canvas Listener Event Composite]))
 
-(import-static java.lang.Math floor ceil log10 round pow)
+(import-static java.lang.Math ceil round)
 
 
-
-
-(defn get-tick-step [axis-min axis-max approx-num-ticks]
-  (let [approx-step (/ (- axis-max axis-min) approx-num-ticks)
-        prelim-step (pow 10 (round (log10 approx-step)))
-        prelim-num-ticks (int (floor (/ (- axis-max axis-min) prelim-step)))]
-    (cond
-      (>= prelim-num-ticks (* 5 approx-num-ticks)) (* prelim-step 5)
-      (>= prelim-num-ticks (* 2 approx-num-ticks)) (* prelim-step 2)
-      (>= approx-num-ticks (* 5 prelim-num-ticks)) (/ prelim-step 5)
-      (>= approx-num-ticks (* 2 prelim-num-ticks)) (/ prelim-step 2)
-      :else prelim-step)))
-
-
-(defn get-tick-locations [axis-min axis-max step]
-  (let [n0 (int (floor (/ axis-min step)))
-        n1 (inc (int (ceil (/ axis-max step))))]
-    (for [n (range n0 n1)] (* n step))))
-
-
-(defn get-tick-string [step number]
-  ; The tick step will always be 1*10^k, 2*10^k, or 5*10^k, where k is an integer.
-  ; We want to back out k, but we don't want the combination of rounding error with
-  ; floor() to give us k-1 when the tick step is (1-eps)*10^k.
-  (let [fudge-factor 1.1
-        num-decimal-places (int (max 0 (int (- (floor (log10 (* step fudge-factor)))))))]
-    (format (str "%." num-decimal-places "f") number)))
-
-
-
-
-(defn- get-system-color [#^GC gc color-id]
-  (.. gc (getDevice) (getSystemColor color-id)))
 
 
 (def left-padding 2)
 (def right-padding 2)
-(def tick-line-width 1)
-(def tick-length 5)
-
-(def pixels-between-ticks 50)
-
-(defn- bg-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_BACKGROUND))
-(defn- tick-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_NORMAL_SHADOW))
-(defn- ticktext-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_FOREGROUND))
-(defn- axis-label-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_FOREGROUND))
-
-
-(defn- set-fg-color [#^GC gc get-color]
-  (.setForeground gc (get-color gc)))
-
-
-(defn- set-bg-color [#^GC gc get-color]
-  (.setBackground gc (get-color gc)))
 
 
 (defn- set-line-width [#^GC gc w]
@@ -72,17 +23,13 @@
 
 
 
-(defn- get-waxis-lims [fig]
-  (let [lims (get-axislims fig :west)]
-    {:min (min-of lims), :max (max-of lims)}))
+(defn get-waxis-lims [fig]
+  (get-axis-lims fig :west))
 
 
 (defn- get-waxis-ticks [fig height]
-  (let [{:keys [min max]} (get-waxis-lims fig)
-        approx-num-ticks (/ height pixels-between-ticks)
-        step (get-tick-step min max approx-num-ticks)
-        locs (if (pos? height) (get-tick-locations min max step) [])]
-    {:step step, :locs locs}))
+  (let [approx-num-ticks (/ height pixels-between-ticks)]
+    (get-axis-ticks fig :west approx-num-ticks)))
 
 
 (defn get-string-width [#^GC gc s]
