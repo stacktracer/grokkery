@@ -161,14 +161,19 @@
     {coordkey (get-coord fig coordkey fraction)}))
 
 
-(defn get-coords [fig x-fraction y-fraction]
-  (dissoc
-    (merge
-      (coord-entry fig :north x-fraction)
-      (coord-entry fig :south x-fraction)
-      (coord-entry fig :east  y-fraction)
-      (coord-entry fig :west  y-fraction))
-    nil))
+(defn get-coords
+  ([fig x-fraction y-fraction]
+    (dissoc
+      (merge
+        (coord-entry fig :north x-fraction)
+        (coord-entry fig :south x-fraction)
+        (coord-entry fig :east  y-fraction)
+        (coord-entry fig :west  y-fraction))
+      nil))
+  ([fig x-fraction y-fraction axiskeys]
+    (select-keys
+      (get-coords fig x-fraction y-fraction)
+      (map #(get-coordkey fig %) axiskeys))))
 
 
 

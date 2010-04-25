@@ -3,7 +3,7 @@
     clojure.contrib.import-static
     grokkery.util
     grokkery.core
-    grokkery.rcp.axis-canvas)
+    grokkery.rcp.graph)
   (:import
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics GC Cursor]
@@ -67,6 +67,7 @@
 
 (defn #^Canvas make-xaxis-canvas [parent fignum draw]
   (let [canvas (Canvas. parent SWT/DOUBLE_BUFFERED)]
+    (attach-graph-mouse-listeners canvas fignum :north :south)
     (add-listener canvas SWT/Paint
       (fn [#^Event event]
         (draw (get-fig fignum) (.gc event) (get-width canvas) (get-height canvas))))

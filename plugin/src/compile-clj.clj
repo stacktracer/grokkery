@@ -4,6 +4,7 @@
     (map compile
       ['grokkery.util
        'grokkery.core
+       'grokkery.rcp.graph
        'grokkery.rcp.saxis-canvas
        'grokkery.rcp.waxis-canvas
        'grokkery.rcp.content-canvas

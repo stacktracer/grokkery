@@ -1,4 +1,4 @@
-(ns grokkery.rcp.axis-canvas
+(ns grokkery.rcp.graph
   (:use
     clojure.contrib.import-static
     grokkery.util
@@ -6,7 +6,7 @@
   (:import
     [org.eclipse.swt SWT]
     [org.eclipse.swt.graphics GC Cursor]
-    [org.eclipse.swt.widgets Canvas Listener Event Composite]))
+    [org.eclipse.swt.widgets Control Listener Event Composite]))
 
 (import-static java.lang.Math floor ceil log10 round pow)
 
@@ -17,6 +17,44 @@
 (def tick-length 5)
 
 (def pixels-between-ticks 50)
+
+
+
+
+(defn attach-graph-mouse-listeners [#^Control control fignum & axiskeys]
+  (let [grab-coords (ref {})
+        
+        get-mouse-coords (fn [#^Event event]
+                           (get-coords (get-fig fignum)
+                             (/ (float (.x event)) (float (get-width control)))
+                             (- 1 (/ (float (.y event)) (float (get-height control))))
+                             axiskeys))
+        
+        ; Up/down events are sometimes interleaved out of order wrt move events.
+        ; To deal with this, we track the button state manually: @grab-coords is
+        ; nil iff no buttons are down. As a result, we treat press and drag events
+        ; the same way, and release and move events the same way.
+        
+        on-press-or-drag (fn [event]
+                           (dosync
+                             (if (nil? @grab-coords)
+                               (ref-set grab-coords (get-mouse-coords event))
+                               (pan fignum (merge-with - @grab-coords (get-mouse-coords event))))))
+        
+        on-release-or-move (fn [event]
+                             (dosync
+                               (ref-set grab-coords nil)))]
+    
+    (.setCursor control (Cursor. (.getDisplay control) SWT/CURSOR_SIZEALL))
+    
+    (add-listener control SWT/MouseUp on-release-or-move)
+    (add-listener control SWT/MouseDown on-press-or-drag)
+    (add-listener control SWT/MouseMove #(if (mouse-button-down? %) (on-press-or-drag %) (on-release-or-move %)))
+    
+    (add-listener control SWT/MouseWheel
+      (fn [#^Event event]
+        (dosync
+          (zoom fignum (- (.count event)) (get-mouse-coords event)))))))
 
 
 
