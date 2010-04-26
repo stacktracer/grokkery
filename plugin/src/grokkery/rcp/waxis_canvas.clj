@@ -34,12 +34,14 @@
 
 (defn get-waxis-width [fig #^GC gc height]
   (let [{:keys [step locs]} (get-waxis-ticks fig height)
-        number-width (->> locs
-                       (map (partial get-tick-string step))
-                       (map (partial get-string-width gc))
-                       (max-of)
-                       (ceil))]
-    (+ left-padding (get-string-height gc) middle-padding number-width right-padding tick-length)))
+        prelim-num-width (->> locs
+                           (drop 1)
+                           (drop-last 1)
+                           (map (partial get-tick-string step))
+                           (map (partial get-string-width gc))
+                           (max-of))
+        num-width (if prelim-num-width (ceil prelim-num-width) 0)]
+    (+ left-padding (get-string-height gc) middle-padding num-width right-padding tick-length)))
 
 
 (defn get-j [height ymin ymax y]
