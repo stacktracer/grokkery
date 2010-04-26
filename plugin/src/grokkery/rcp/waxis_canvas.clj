@@ -40,8 +40,16 @@
                            (map (partial get-tick-string step))
                            (map (partial get-string-width gc))
                            (max-of))
-        num-width (if prelim-num-width (ceil prelim-num-width) 0)]
-    (+ left-padding (get-string-height gc) middle-padding num-width right-padding tick-length)))
+        num-width (if prelim-num-width
+                    (ceil prelim-num-width)
+                    0)]
+    (+
+      left-padding
+      (get-string-height gc)  ; axis label is rotated 90 degrees
+      middle-padding
+      num-width
+      right-padding
+      tick-length)))
 
 
 (defn get-j [height ymin ymax y]
