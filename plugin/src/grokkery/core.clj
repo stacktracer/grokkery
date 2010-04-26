@@ -2,6 +2,7 @@
   (:use
     grokkery.util)
   (:import
+    [java.util NoSuchElementException]
     [javax.media.opengl GL]))
 
 
@@ -192,6 +193,16 @@
 
 (defn def-coord [fignum plotnum coordkey coordfn]
   (update-coords fignum plotnum assoc coordkey coordfn))
+
+
+(defn rekey-coord [fignum plotnum old-coordkey new-coordkey]
+  (update-coords fignum plotnum
+    (fn [coords]
+      (when-not (contains? coords old-coordkey)
+        (throw (NoSuchElementException. (str "No coord by this key: fig = " fignum ", plot = " plotnum ", key = " old-coordkey))))
+      (-> coords
+        (assoc new-coordkey (get coords old-coordkey))
+        (dissoc old-coordkey)))))
 
 
 (defn get-coordfn [fig plot coordkey]
