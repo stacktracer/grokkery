@@ -7,7 +7,7 @@
     [javax.media.opengl GL GLContext GLDrawableFactory]
     [org.eclipse.swt SWT]
     [org.eclipse.swt.opengl GLCanvas GLData]
-    [org.eclipse.swt.graphics GC Cursor]
+    [org.eclipse.swt.graphics GC]
     [org.eclipse.swt.widgets Canvas Listener Event]))
 
 
@@ -34,6 +34,7 @@
         reshaped (ref true)]
     
     (attach-graph-mouse-listeners canvas fignum :north :south :east :west)
+    (set-mouse-cursor canvas SWT/CURSOR_SIZEALL)
     
     (.setCurrent canvas)
     (.makeCurrent context)

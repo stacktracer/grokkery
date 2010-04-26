@@ -5,7 +5,7 @@
     grokkery.core)
   (:import
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.graphics GC Cursor]
+    [org.eclipse.swt.graphics GC]
     [org.eclipse.swt.widgets Control Listener Event Composite]))
 
 (import-static java.lang.Math floor ceil log10 round pow)
@@ -44,8 +44,6 @@
         on-release-or-move (fn [event]
                              (dosync
                                (ref-set grab-coords nil)))]
-    
-    (.setCursor control (Cursor. (.getDisplay control) SWT/CURSOR_SIZEALL))
     
     (add-listener control SWT/MouseUp on-release-or-move)
     (add-listener control SWT/MouseDown on-press-or-drag)

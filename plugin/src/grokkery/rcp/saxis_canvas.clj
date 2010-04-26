@@ -6,7 +6,7 @@
     grokkery.rcp.graph)
   (:import
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.graphics GC Cursor]
+    [org.eclipse.swt.graphics GC]
     [org.eclipse.swt.widgets Canvas Listener Event Composite]))
 
 (import-static java.lang.Math ceil round)
@@ -68,6 +68,7 @@
 (defn #^Canvas make-xaxis-canvas [parent fignum draw]
   (let [canvas (Canvas. parent SWT/DOUBLE_BUFFERED)]
     (attach-graph-mouse-listeners canvas fignum :north :south)
+    (set-mouse-cursor canvas SWT/CURSOR_SIZEWE)
     (add-listener canvas SWT/Paint
       (fn [#^Event event]
         (draw (get-fig fignum) (.gc event) (get-width canvas) (get-height canvas))))

@@ -2,6 +2,7 @@
   (:import
     [org.eclipse.swt SWT]
     [org.eclipse.swt.widgets Listener Display Event Control]
+    [org.eclipse.swt.graphics Cursor]
     [org.eclipse.swt.events VerifyListener VerifyEvent]
     [org.eclipse.ui PlatformUI]
     [javax.media.opengl GL]))
@@ -56,6 +57,13 @@
 
 (defn get-height [#^Control control]
   (.. control (getSize) y))
+
+
+(defn set-mouse-cursor [#^Control control cursor-id]
+  (.setCursor control
+   (Cursor.
+     (.getDisplay control)
+     cursor-id)))
 
 
 (defn gl-set-color [#^GL gl c]
