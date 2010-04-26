@@ -15,6 +15,7 @@
 
 (def tick-line-width 1)
 (def tick-length 5)
+(def border-width 1)
 
 (def pixels-between-ticks 50)
 
@@ -109,6 +110,7 @@
 (defn tick-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_NORMAL_SHADOW))
 (defn ticktext-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_FOREGROUND))
 (defn axislabel-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_FOREGROUND))
+(defn border-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_NORMAL_SHADOW))
 
 
 (defn set-fg-color [#^GC gc get-color]
