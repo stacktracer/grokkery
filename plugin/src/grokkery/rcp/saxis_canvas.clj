@@ -79,7 +79,6 @@
     (let [text "__ AXIS __ LABEL __"
           i (get-string-i gc (* 0.5 width) text)
           j (+ tick-length top-padding (get-string-height gc) middle-padding)]
-      (println i j)
       (.drawString gc text i j))))
 
 
