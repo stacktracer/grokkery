@@ -1,6 +1,7 @@
 (ns grokkery.rcp.saxis-canvas
   (:use
     clojure.contrib.import-static
+    clojure.contrib.def
     grokkery.util
     grokkery.core
     grokkery.rcp.graph)
@@ -14,9 +15,11 @@
 
 
 
-(def top-padding 2)
-(def middle-padding 2)
-(def bottom-padding 2)
+(defvar- top-padding 2)
+(defvar- middle-padding 2)
+(defvar- bottom-padding 2)
+
+
 
 
 (defn get-saxis-lims [fig]
