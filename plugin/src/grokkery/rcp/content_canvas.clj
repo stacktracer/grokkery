@@ -43,7 +43,6 @@
     (.glPolygonMode GL/GL_FRONT_AND_BACK GL/GL_LINE))
   
   (let [c #^Color (border-color gc)]
-    (println (.getRed c) (.getGreen c) (.getBlue c))
     (.glColor3ub gl (.getRed c) (.getGreen c) (.getBlue c)))
   
   (gl-draw gl GL/GL_QUADS
