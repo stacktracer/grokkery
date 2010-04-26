@@ -146,6 +146,14 @@
   (get-in fig [:axes axiskey]))
 
 
+(defn get-coordname [fig coordkey]
+  (name coordkey))
+
+
+(defn get-axisname [fig axiskey]
+  (get-coordname fig (get-coordkey fig axiskey)))
+
+
 (defn get-axislims [fig axiskey]
   (get-coordlims fig (get-coordkey fig axiskey)))
 

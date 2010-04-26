@@ -27,6 +27,10 @@
   (get-axis-ticks fig :south width))
 
 
+(defn get-saxis-label [fig]
+  (get-axisname fig :south))
+
+
 (defn get-saxis-height [fig #^GC gc]
   (let [string-height (get-string-height gc)]
     (+
@@ -76,7 +80,7 @@
     
     ; Axis label
     (set-fg-color gc axislabel-color)
-    (let [text "__ AXIS __ LABEL __"
+    (let [text (get-saxis-label fig)
           i (get-string-i gc (* 0.5 width) text)
           j (+ tick-length top-padding (get-string-height gc) middle-padding)]
       (.drawString gc text i j))))

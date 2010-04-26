@@ -26,6 +26,10 @@
   (get-axis-ticks fig :west height))
 
 
+(defn get-waxis-label [fig]
+  (get-axisname fig :west))
+
+
 (defn get-waxis-width [fig #^GC gc height]
   (let [{:keys [step locs]} (get-waxis-ticks fig height)
         number-width (->> locs
