@@ -1,12 +1,13 @@
 (ns grokkery.rcp.waxis-canvas
   (:use
     clojure.contrib.import-static
+    clojure.contrib.def
     grokkery.util
     grokkery.core
     grokkery.rcp.graph)
   (:import
     [org.eclipse.swt SWT]
-    [org.eclipse.swt.graphics GC]
+    [org.eclipse.swt.graphics GC Transform]
     [org.eclipse.swt.widgets Canvas Listener Event Composite]))
 
 (import-static java.lang.Math ceil round)
@@ -14,8 +15,9 @@
 
 
 
-(def left-padding 2)
-(def right-padding 2)
+(defvar- left-padding 2)
+(defvar- middle-padding 2)
+(defvar- right-padding 2)
 
 
 (defn get-waxis-lims [fig]
@@ -37,7 +39,7 @@
                        (map (partial get-string-width gc))
                        (max-of)
                        (ceil))]
-    (+ left-padding number-width right-padding tick-length)))
+    (+ left-padding (get-string-height gc) middle-padding number-width right-padding tick-length)))
 
 
 (defn get-j [height ymin ymax y]
@@ -47,6 +49,25 @@
 (defn get-j-fn [fig height]
   (let [{:keys [min max]} (get-waxis-lims fig)]
     (partial get-j height min max)))
+
+
+(defn #^Transform get-current-xform [#^GC gc]
+  (let [xform (Transform. (.getDevice gc))]
+    (.getTransform gc xform)
+    xform))
+
+
+(defn with-transform [#^GC gc alter-transform f]
+  (let [saved-xform (get-current-xform gc)
+        altered-xform (get-current-xform gc)]
+    (try
+      (alter-transform altered-xform)
+      (.setTransform gc altered-xform)
+      (f)
+      (finally
+        (.setTransform gc saved-xform)
+        (.dispose saved-xform)
+        (.dispose altered-xform)))))
 
 
 (defn draw-waxis [fig #^GC gc width height]
@@ -67,7 +88,18 @@
             text-extent (.stringExtent gc text)
             i (- width tick-length right-padding (.x text-extent))
             j (round (double (- (j-of y) (* 0.5 (.y text-extent)))))]
-        (.drawString gc text i j)))))
+        (.drawString gc text i j)))
+    
+    ; Axis label
+    (set-fg-color gc axislabel-color)
+    (let [text (get-waxis-label fig)
+          i left-padding
+          j (round (double (* 0.5 (+ height (get-string-width gc text)))))]
+      (with-transform gc
+        #(doto #^Transform %
+           (.translate i j)
+           (.rotate -90))
+        #(.drawString gc text 0 0)))))
 
 
 (defn #^Canvas make-yaxis-canvas [parent fignum draw]
