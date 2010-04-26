@@ -26,10 +26,6 @@
   (get-axis-ticks fig :west height))
 
 
-(defn get-string-width [#^GC gc s]
-  (.. gc (stringExtent s) x))
-
-
 (defn get-waxis-width [fig #^GC gc height]
   (let [{:keys [step locs]} (get-waxis-ticks fig height)
         number-width (->> locs

@@ -108,7 +108,7 @@
 (defn bg-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_BACKGROUND))
 (defn tick-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_NORMAL_SHADOW))
 (defn ticktext-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_FOREGROUND))
-(defn axis-label-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_FOREGROUND))
+(defn axislabel-color [#^GC gc] (get-system-color gc SWT/COLOR_WIDGET_FOREGROUND))
 
 
 (defn set-fg-color [#^GC gc get-color]
@@ -117,3 +117,14 @@
 
 (defn set-bg-color [#^GC gc get-color]
   (.setBackground gc (get-color gc)))
+
+
+(defn get-string-width [#^GC gc s]
+  (.. gc (stringExtent s) x))
+
+
+(defn get-string-height
+  ([#^GC gc s]
+    (.. gc (stringExtent s) y))
+  ([#^GC gc]
+    (get-string-height gc "ABCD0123jgqpy_,`'/<({[|$#!?")))

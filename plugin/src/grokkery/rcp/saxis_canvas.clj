@@ -15,6 +15,7 @@
 
 
 (def top-padding 2)
+(def middle-padding 2)
 (def bottom-padding 2)
 
 
@@ -26,13 +27,15 @@
   (get-axis-ticks fig :south width))
 
 
-(defn get-string-height [#^GC gc s]
-  (.. gc (stringExtent s) y))
-
-
 (defn get-saxis-height [fig #^GC gc]
-  (let [number-height (get-string-height gc "+0.12345678E-9")]
-    (+ bottom-padding number-height top-padding tick-length)))
+  (let [string-height (get-string-height gc)]
+    (+
+      tick-length
+      top-padding
+      string-height
+      middle-padding
+      string-height
+      bottom-padding)))
 
 
 (defn get-i [width xmin xmax x]
@@ -42,6 +45,14 @@
 (defn get-i-fn [fig width]
   (let [{:keys [min max]} (get-saxis-lims fig)]
     (partial get-i width min max)))
+
+
+(defn get-string-i [gc i-center text]
+  (round
+    (double
+      (-
+        i-center
+        (* 0.5 (get-string-width gc text))))))  
 
 
 (defn draw-saxis [fig #^GC gc width height]
@@ -59,10 +70,17 @@
     (set-fg-color gc ticktext-color)
     (doseq [x locs]
       (let [text (get-tick-string step x)
-            text-extent (.stringExtent gc text)
-            i (round (double (- (i-of x) (* 0.5 (.x text-extent)))))
+            i (get-string-i gc (i-of x) text)
             j (+ tick-length top-padding)]
-        (.drawString gc text i j)))))
+        (.drawString gc text i j)))
+    
+    ; Axis label
+    (set-fg-color gc axislabel-color)
+    (let [text "__ AXIS __ LABEL __"
+          i (get-string-i gc (* 0.5 width) text)
+          j (+ tick-length top-padding (get-string-height gc) middle-padding)]
+      (println i j)
+      (.drawString gc text i j))))
 
 
 (defn #^Canvas make-xaxis-canvas [parent fignum draw]
