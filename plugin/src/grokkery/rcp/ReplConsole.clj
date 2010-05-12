@@ -1,6 +1,8 @@
 (ns grokkery.rcp.ReplConsole
   (:require
     clojure.main)
+  (:use
+    clojure.contrib.pprint)
   (:import
     [java.io InputStreamReader PrintWriter]
     [clojure.lang LineNumberingPushbackReader]
@@ -35,7 +37,8 @@
         out (.newOutputStream this)
         err (.newOutputStream this)
         prompt-out (.newOutputStream this)
-        prompt (make-prompt-fn prompt-out)]
+        prompt (make-prompt-fn prompt-out)
+        print-result #(do (pprint %) (flush))]
     (.setColor in (Color. nil 0 0 0))
     (.setColor out (Color. nil 0 0 192))
     (.setColor err (Color. nil 255 0 0))
@@ -46,7 +49,10 @@
         #(binding [*in* (LineNumberingPushbackReader. (InputStreamReader. in))
                    *out* (PrintWriter. out true)
                    *err* (PrintWriter. err true)]
-           (clojure.main/repl :init init-repl :prompt prompt))
+           (clojure.main/repl
+             :init init-repl
+             :prompt prompt
+             :print print-result))
         "Clojure Repl")
       (.setDaemon true)
       (.start))))
